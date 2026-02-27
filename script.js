@@ -4,12 +4,12 @@
 /* Para activar Firebase real, reemplaza este config con el tuyo desde la consola de Firebase.
 */
 const firebaseConfig = {
-	apiKey: "AIzaSyC8TwHap3v02nWbTeVPEsqfvi5n5vrDU-0",
-	authDomain: "sitse-pnp-2f21f.firebaseapp.com",
-	projectId: "sitse-pnp-2f21f",
-	storageBucket: "sitse-pnp-2f21f.firebasestorage.app",
-	messagingSenderId: "96701502418",
-	appId: "1:96701502418:web:ba18709948e18838f8ae0b"
+    apiKey: "AIzaSyC8TwHap3v02nWbTeVPEsqfvi5n5vrDU-0",
+    authDomain: "sitse-pnp-2f21f.firebaseapp.com",
+    projectId: "sitse-pnp-2f21f",
+    storageBucket: "sitse-pnp-2f21f.firebasestorage.app",
+    messagingSenderId: "96701502418",
+    appId: "1:96701502418:web:ba18709948e18838f8ae0b"
 };
 
 // Inicializar Firebase
@@ -71,9 +71,6 @@ function toggleAuthMode() {
     document.getElementById('reg-msg').innerText = '';
 }
 
-// ==========================================
-// INICIALIZACIÓN UNIFICADA DE LA PLATAFORMA
-// ==========================================
 // ==========================================
 // INICIALIZACIÓN UNIFICADA DE LA PLATAFORMA
 // ==========================================
@@ -161,13 +158,13 @@ function registrarUsuario() {
     // Guardar en Firebase (Simulado localmente para la demo)
     let users = JSON.parse(localStorage.getItem('sitse_users')) || [];
     if(users.find(u => u.cip === cip)) {
-        alert("El CIP ya estÃ¡ registrado.");
+        alert("El CIP ya está registrado.");
         return;
     }
     users.push(newUser);
     localStorage.setItem('sitse_users', JSON.stringify(users));
 
-    document.getElementById('reg-msg').innerText = "Registro exitoso. Su usuario es su CIP y contraseÃ±a su DNI.";
+    document.getElementById('reg-msg').innerText = "Registro exitoso. Su usuario es su CIP y contraseña su DNI.";
     setTimeout(toggleAuthMode, 2000);
 }
 
@@ -175,7 +172,7 @@ function intentarLogin() {
     const cip = document.getElementById('input-cip').value.trim();
     const dni = document.getElementById('input-dni').value.trim();
     
-    // VerificaciÃ³n de Administrador
+    // Verificación de Administrador
     if(cip === ADMIN_CRED.cip && dni === ADMIN_CRED.dni) {
         usuarioActual = { nombres: "Crnl. PNP Manuel ZURITA (Admin)", rol: 'admin', cip: ADMIN_CRED.cip };
         localStorage.setItem('sitse_currentUser', JSON.stringify(usuarioActual)); 
@@ -183,7 +180,7 @@ function intentarLogin() {
         return;
     }
 
-    // VerificaciÃ³n de Usuario Normal
+    // Verificación de Usuario Normal
     let users = JSON.parse(localStorage.getItem('sitse_users')) || [];
     let user = users.find(u => u.cip === cip && u.dni === dni);
 
@@ -203,14 +200,14 @@ function iniciarSesionUI() {
     if(usuarioActual.rol === 'admin') {
         document.getElementById('nav-admin').classList.remove('hidden');
     }
-	
-    actualizarNotificaciones(); // <--- NUEVA LÃNEA
+    
+    actualizarNotificaciones();
     cambiarPantalla('casel-intro-screen');
     iniciarScrollAnimations();
 }
 
 function logout() { 
-    localStorage.removeItem('sitse_currentUser'); // Borrar sesiÃ³n al salir
+    localStorage.removeItem('sitse_currentUser'); // Borrar sesión al salir
     location.reload(); 
 }
 
@@ -262,7 +259,7 @@ function renderizarCasos() {
                 <div class="card-img" style="background-image: url('${c.imagenBase}'); background-color:#333"></div>
                 <div class="card-info">
                     <h3>${c.titulo}</h3>
-                    <p>EvalÃºa las 6 dimensiones CASEL bajo estrÃ©s dinÃ¡mico.</p>
+                    <p>Evalúa las 6 dimensiones CASEL bajo estrés dinámico.</p>
                 </div>
             </div>`;
     });
@@ -345,8 +342,8 @@ function iniciarTimer(opcionesDisponibles) {
                 (prev.stats.decisiones < curr.stats.decisiones) ? prev : curr
             );
             
-            // Pasamos "opcionesDisponibles" para que el sistema recuerde quÃ© otras opciones tenÃ­as
-            procesarDecision(peorOpcion, {texto: "Se acabÃ³ el tiempo. Te congelaste.", opciones: opcionesDisponibles}, true);
+            // Pasamos "opcionesDisponibles" para que el sistema recuerde qué otras opciones tenías
+            procesarDecision(peorOpcion, {texto: "Se acabó el tiempo. Te congelaste.", opciones: opcionesDisponibles}, true);
         }
     }, 1000);
 }
@@ -371,7 +368,7 @@ function procesarDecision(opcion, escenaAnterior, fueTimeout = false) {
 
     historialSesion.push({
         situacion: escenaAnterior.texto,
-        decision: fueTimeout ? "NINGUNA (Bloqueo por EstrÃ©s). El sistema ejecutÃ³ el peor escenario." : opcion.texto,
+        decision: fueTimeout ? "NINGUNA (Bloqueo por Estrés). El sistema ejecutó el peor escenario." : opcion.texto,
         evaluacion: opcion.tipo,
         feedback: opcion.feedback,
         tiempo: tiempoUsado,
@@ -400,15 +397,15 @@ function finalizarSimulacion(textoFinal) {
     };
 
     // GUARDAR EN FIREBASE (LA NUBE)
-	db.collection("resultados_sitse").add(resultado)
-	.then(async (docRef) => { // <-- Añade 'async' aquí
-		console.log("Misión registrada en la nube con ID: ", docRef.id);
+    db.collection("resultados_sitse").add(resultado)
+    .then(async (docRef) => { // <-- Añade 'async' aquí
+        console.log("Misión registrada en la nube con ID: ", docRef.id);
 
-		// <-- AÑADE ESTA LÍNEA para actualizar la memoria al instante
-		await sincronizarBaseDatos(); 
+        // <-- AÑADE ESTA LÍNEA para actualizar la memoria al instante
+        await sincronizarBaseDatos(); 
 
-		generarInformeFinal(resultado, textoFinal);
-	})
+        generarInformeFinal(resultado, textoFinal);
+    })
     .catch((error) => {
         console.error("Error al guardar el expediente: ", error);
         alert("Hubo un error de conexión al guardar sus resultados.");
@@ -416,7 +413,7 @@ function finalizarSimulacion(textoFinal) {
 }
 
 // ==========================================
-// 4. REPORTES Y ANÁLISIS PSICOMÃ‰TRICO
+// 4. REPORTES Y ANÁLISIS PSICOMÉTRICO
 // ==========================================
 function generarInformeFinal(res, textoFinal, indexGlobal = null) {
     cambiarPantalla('result-screen');
@@ -426,11 +423,11 @@ function generarInformeFinal(res, textoFinal, indexGlobal = null) {
     html += `<h2 style="color:var(--pnp-dark);">Puntaje Operativo Final: ${res.puntaje}</h2>`;
     
     html += `<h4>Perfil de Competencias CASEL</h4>`;
-    const labels = ["Autoconciencia", "Autocontrol", "Conciencia Social", "Hab. Relacionales", "Toma de Decisiones", "ComunicaciÃ³n"];
+    const labels = ["Autoconciencia", "Autocontrol", "Conciencia Social", "Hab. Relacionales", "Toma de Decisiones", "Comunicación"];
     const keys = ["autoconciencia", "autocontrol", "social", "relacional", "decisiones", "comunicacion"];
     
     keys.forEach((k, i) => {
-        // NUEVA FÃ“RMULA MATEMÃTICA: Empieza en 50%. Las decisiones buenas suman, las malas restan.
+        // NUEVA FÓRMULA MATEMÁTICA: Empieza en 50%. Las decisiones buenas suman, las malas restan.
         let val = Math.max(0, Math.min(100, 50 + (res.stats[k] * 0.6)));
         let color = val > 75 ? 'var(--success)' : val > 45 ? 'var(--warning)' : 'var(--danger)';
         
@@ -443,21 +440,21 @@ function generarInformeFinal(res, textoFinal, indexGlobal = null) {
             </div>`;
     });
 
-    html += `<h4 style="margin-top:30px;">AnÃ¡lisis de la Secuencia TÃ¡ctica</h4><div style="text-align:left;">`;
+    html += `<h4 style="margin-top:30px;">Análisis de la Secuencia Táctica</h4><div style="text-align:left;">`;
     
     res.detalle.forEach((d, pasoIndex) => {
-        let badgeClass = d.evaluacion === "IdÃ³neo" ? "bg-success" : d.evaluacion === "Oportunidad de Mejora" ? "bg-danger" : "bg-warning";
+        let badgeClass = d.evaluacion === "Idóneo" ? "bg-success" : d.evaluacion === "Oportunidad de Mejora" ? "bg-danger" : "bg-warning";
         html += `
             <div style="padding:15px; border-left:4px solid #ccc; margin-bottom:15px; background:#f9f9f9; border-radius:4px;">
                 <p><strong>Fase ${pasoIndex+1} (${d.tiempo}s)</strong>: <span class="badge ${badgeClass}">${d.evaluacion}</span></p>
-                <p><em>DecisiÃ³n:</em> ${d.decision}</p>
-                <p style="color:#555; font-size:0.95rem;"><em>AnÃ¡lisis PsicolÃ³gico:</em> ${d.feedback}</p>`;
+                <p><em>Decisión:</em> ${d.decision}</p>
+                <p style="color:#555; font-size:0.95rem;"><em>Análisis Psicológico:</em> ${d.feedback}</p>`;
         
-        // --- SECCIÃ“N DE COMENTARIOS ---
+        // --- SECCIÓN DE COMENTARIOS ---
         if (d.comentarioInstructor) {
             html += `
                 <div class="admin-comment-box">
-                    <span class="admin-comment-title">ðŸ’¡ Nota del Instructor:</span>
+                    <span class="admin-comment-title">💡 Nota del Instructor:</span>
                     <p style="margin:0; font-size:0.95rem; color:#333;">${d.comentarioInstructor}</p>
                 </div>`;
         }
@@ -477,21 +474,21 @@ function generarInformeFinal(res, textoFinal, indexGlobal = null) {
         html += `</div>`; 
     });
     
-    // --- LÃ“GICA CORREGIDA DEL BOTÃ“N VOLVER ---
+    // --- LÓGICA CORREGIDA DEL BOTÓN VOLVER ---
     let accionVolver = "volverInicio()";
-    let textoVolver = "â¬… Volver al MenÃº Principal";
+    let textoVolver = "⬅ Volver al Menú Principal";
     let botonArbol = ""; 
 
     if (indexGlobal !== null) {
         if (usuarioActual && usuarioActual.rol === 'admin') {
             // AHORA SIMPLEMENTE REGRESA A LA PANTALLA ADMIN Y MUESTRA LA LISTA QUE YA ESTABA CARGADA
             accionVolver = "cambiarPantalla('admin-screen')";
-            textoVolver = "â¬… Volver a la Lista Anterior";
+            textoVolver = "⬅ Volver a la Lista Anterior";
             
-            botonArbol = `<button onclick="verArbolDecision(${indexGlobal})" class="btn-primary" style="background:#00b4d8; color:#000; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);"><span style="font-size:1.2rem;">ðŸ•¸ï¸</span> Ver Mapa de Trayectoria</button>`;
+            botonArbol = `<button onclick="verArbolDecision(${indexGlobal})" class="btn-primary" style="background:#00b4d8; color:#000; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);"><span style="font-size:1.2rem;">🕸️</span> Ver Mapa de Trayectoria</button>`;
         } else {
             accionVolver = "verResultadosHistorial()";
-            textoVolver = "â¬… Volver a Mis Resultados";
+            textoVolver = "⬅ Volver a Mis Resultados";
         }
     }
 
@@ -507,13 +504,13 @@ function generarInformeFinal(res, textoFinal, indexGlobal = null) {
 // ==========================================
 // 5. PANEL ADMIN Y VISTA DE USUARIOS
 // ==========================================
-// FunciÃ³n para ver el detalle exacto de una simulaciÃ³n pasada
+// Función para ver el detalle exacto de una simulación pasada
 function verDetalleGuardado(indexGlobal) {
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     let registro = resultados[indexGlobal];
     
     if(registro) {
-        // Si el usuario normal abre su resultado, marcamos los comentarios nuevos como "leÃ­dos"
+        // Si el usuario normal abre su resultado, marcamos los comentarios nuevos como "leídos"
         if(usuarioActual.rol !== 'admin') {
             let modificado = false;
             registro.detalle.forEach(d => {
@@ -530,7 +527,7 @@ function verDetalleGuardado(indexGlobal) {
             }
         }
         
-        generarInformeFinal(registro, "REVISIÃ“N DE EXPEDIENTE OPERATIVO", indexGlobal);
+        generarInformeFinal(registro, "REVISIÓN DE EXPEDIENTE OPERATIVO", indexGlobal);
     }
 }
 
@@ -562,7 +559,7 @@ function guardarComentarioAdmin(indexGlobal, pasoIndex) {
 }
 
 function borrarComentarioAdmin(indexGlobal, pasoIndex) {
-    if(confirm("Â¿Eliminar este comentario?")) {
+    if(confirm("¿Eliminar este comentario?")) {
         let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
         if(resultados[indexGlobal] && resultados[indexGlobal].detalle[pasoIndex]) {
             delete resultados[indexGlobal].detalle[pasoIndex].comentarioInstructor;
@@ -572,7 +569,7 @@ function borrarComentarioAdmin(indexGlobal, pasoIndex) {
     }
 }
 
-// NUEVA FUNCIÃ“N PARA EL FOCO DE NOTIFICACIONES
+// NUEVA FUNCIÓN PARA EL FOCO DE NOTIFICACIONES
 function actualizarNotificaciones() {
     if(!usuarioActual || usuarioActual.rol === 'admin') return; 
     
@@ -581,7 +578,7 @@ function actualizarNotificaciones() {
     
     resultados.forEach(r => {
         if(r.usuario === usuarioActual.cip) {
-            // Solo contamos los que tienen comentario Y NO han sido leÃ­dos
+            // Solo contamos los que tienen comentario Y NO han sido leídos
             let tieneNuevo = r.detalle.some(d => d.comentarioInstructor && !d.comentarioLeido);
             if(tieneNuevo) casosConComentariosNuevos++;
         }
@@ -632,7 +629,7 @@ async function verResultadosHistorial() {
 }
 
 // ==========================================
-// LÃ“GICA DEL NUEVO PANEL ADMIN MULTINIVEL
+// LÓGICA DEL NUEVO PANEL ADMIN MULTINIVEL
 // ==========================================
 
 async function verPanelAdmin() {
@@ -649,10 +646,10 @@ async function verPanelAdmin() {
 function volverMenuAdmin() {
     document.getElementById('admin-menu').classList.remove('hidden');
     document.getElementById('admin-content').classList.add('hidden');
-    document.getElementById('admin-breadcrumb').innerText = "MenÃº Principal";
+    document.getElementById('admin-breadcrumb').innerText = "Menú Principal";
 }
 
-// --- OPCIÃ“N 1: USUARIOS ---
+// --- OPCIÓN 1: USUARIOS ---
 function mostrarAdminUsuarios() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
@@ -696,16 +693,16 @@ function mostrarAdminUsuarios() {
 }
 
 function mostrarHistorialUsuario(cip, nombre) {
-    document.getElementById('admin-breadcrumb').innerText = `MenÃº Principal > Personal Evaluado > ${nombre}`;
+    document.getElementById('admin-breadcrumb').innerText = `Menú Principal > Personal Evaluado > ${nombre}`;
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     let historialUsuario = resultados.map((r, index) => ({...r, originalIndex: index})).filter(r => r.usuario === cip);
     
     let html = `<h3>Historial de: ${nombre}</h3>
-                <div class="table-container"><table><thead><tr><th>Fecha</th><th>Escenario</th><th>Puntaje</th><th>AcciÃ³n</th></tr></thead><tbody>`;
+                <div class="table-container"><table><thead><tr><th>Fecha</th><th>Escenario</th><th>Puntaje</th><th>Acción</th></tr></thead><tbody>`;
     
     // SI NO TIENE REGISTROS, MOSTRAMOS EL MENSAJE
     if (historialUsuario.length === 0) {
-        html += `<tr><td colspan="4" style="text-align:center; color: var(--accent); font-weight:bold;">NO HAY REGISTROS DE SIMULACIÃ“N PARA ESTE USUARIO.</td></tr>`;
+        html += `<tr><td colspan="4" style="text-align:center; color: var(--accent); font-weight:bold;">NO HAY REGISTROS DE SIMULACIÓN PARA ESTE USUARIO.</td></tr>`;
     } else {
         historialUsuario.reverse().forEach(r => {
             html += `<tr>
@@ -716,22 +713,22 @@ function mostrarHistorialUsuario(cip, nombre) {
     }
     
     html += `</tbody></table></div>
-             <div class="action-buttons"><button onclick="mostrarAdminUsuarios()" class="btn-secondary">â¬… Volver a la lista de usuarios</button></div>`;
+             <div class="action-buttons"><button onclick="mostrarAdminUsuarios()" class="btn-secondary">⬅ Volver a la lista de usuarios</button></div>`;
              
     document.getElementById('admin-dynamic-view').innerHTML = html;
 }
 
-// --- OPCIÃ“N 2: RANKING GLOBAL ---
+// --- OPCIÓN 2: RANKING GLOBAL ---
 function mostrarAdminListaCasos() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
-    document.getElementById('admin-breadcrumb').innerText = "MenÃº Principal > Ranking Global";
+    document.getElementById('admin-breadcrumb').innerText = "Menú Principal > Ranking Global";
     
     let html = `<h3>Seleccione un Simulador para ver el Ranking:</h3><div style="display:flex; flex-direction:column; gap:10px;">`;
     Object.keys(baseDatosCasos).forEach(id => {
         html += `<div class="admin-list-item" onclick="mostrarRankingGlobal('${baseDatosCasos[id].titulo}')">
                     <span><strong>${baseDatosCasos[id].titulo}</strong></span>
-                    <span>Ver Tabla âž”</span>
+                    <span>Ver Tabla ➔</span>
                  </div>`;
     });
     html += `</div>`;
@@ -739,7 +736,7 @@ function mostrarAdminListaCasos() {
 }
 
 function mostrarRankingGlobal(tituloCaso) {
-    document.getElementById('admin-breadcrumb').innerText = `MenÃº Principal > Ranking Global > ${tituloCaso}`;
+    document.getElementById('admin-breadcrumb').innerText = `Menú Principal > Ranking Global > ${tituloCaso}`;
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     let filtrados = resultados.filter(r => r.caso === tituloCaso).sort((a, b) => b.puntaje - a.puntaje);
     
@@ -751,7 +748,7 @@ function mostrarRankingGlobal(tituloCaso) {
     } else {
         filtrados.forEach((r, index) => {
             let claseFila = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : index < 10 ? "rank-top10" : "rank-normal";
-            let trofeo = index === 0 ? "ðŸ†" : index === 1 ? "ðŸ¥ˆ" : index === 2 ? "ðŸ¥‰" : `${index + 1}Â°`;
+            let trofeo = index === 0 ? "🏆" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}°`;
             html += `<tr class="${claseFila}">
                         <td>${trofeo}</td><td>${r.nombre}</td><td>${r.usuario}</td><td>${r.puntaje} pts</td>
                      </tr>`;
@@ -759,16 +756,16 @@ function mostrarRankingGlobal(tituloCaso) {
     }
     
     html += `</tbody></table></div>
-             <div class="action-buttons"><button onclick="mostrarAdminListaCasos()" class="btn-secondary">â¬… Volver a simuladores</button></div>`;
+             <div class="action-buttons"><button onclick="mostrarAdminListaCasos()" class="btn-secondary">⬅ Volver a simuladores</button></div>`;
              
     document.getElementById('admin-dynamic-view').innerHTML = html;
 }
 
-// --- OPCIÃ“N 3: RANKING POR COMPETENCIAS ---
+// --- OPCIÓN 3: RANKING POR COMPETENCIAS ---
 function mostrarAdminListaCompetencias() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
-    document.getElementById('admin-breadcrumb').innerText = "MenÃº Principal > Ranking por Competencias";
+    document.getElementById('admin-breadcrumb').innerText = "Menú Principal > Ranking por Competencias";
     
     const competencias = [
         { id: 'autoconciencia', nombre: 'Autoconciencia' },
@@ -776,14 +773,14 @@ function mostrarAdminListaCompetencias() {
         { id: 'social', nombre: 'Conciencia Social' },
         { id: 'relacional', nombre: 'Habilidades Relacionales' },
         { id: 'decisiones', nombre: 'Toma de Decisiones' },
-        { id: 'comunicacion', nombre: 'ComunicaciÃ³n Asertiva' }
+        { id: 'comunicacion', nombre: 'Comunicación Asertiva' }
     ];
 
     let html = `<h3>Seleccione una Competencia CASEL:</h3><div style="display:flex; flex-direction:column; gap:10px;">`;
     competencias.forEach(comp => {
         html += `<div class="admin-list-item" onclick="mostrarRankingCompetencia('${comp.id}', '${comp.nombre}')">
                     <span><strong>${comp.nombre}</strong></span>
-                    <span>Ver LÃ­deres âž”</span>
+                    <span>Ver Líderes ➔</span>
                  </div>`;
     });
     html += `</div>`;
@@ -791,7 +788,7 @@ function mostrarAdminListaCompetencias() {
 }
 
 function mostrarRankingCompetencia(idComp, nombreComp) {
-    document.getElementById('admin-breadcrumb').innerText = `MenÃº Principal > Ranking por Competencias > ${nombreComp}`;
+    document.getElementById('admin-breadcrumb').innerText = `Menú Principal > Ranking por Competencias > ${nombreComp}`;
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     
     let promedios = {};
@@ -807,15 +804,15 @@ function mostrarRankingCompetencia(idComp, nombreComp) {
         promedio: (promedios[cip].total / promedios[cip].cuenta).toFixed(1)
     })).sort((a, b) => b.promedio - a.promedio);
 
-    let html = `<h3>LÃ­deres en: ${nombreComp}</h3>
-                <div class="table-container"><table><thead><tr><th>Puesto</th><th>Personal</th><th>Promedio HistÃ³rico</th></tr></thead><tbody>`;
+    let html = `<h3>Líderes en: ${nombreComp}</h3>
+                <div class="table-container"><table><thead><tr><th>Puesto</th><th>Personal</th><th>Promedio Histórico</th></tr></thead><tbody>`;
     
     if (ranking.length === 0) {
-        html += `<tr><td colspan="3" style="text-align:center; color: var(--accent); font-weight:bold;">NO HAY REGISTROS EVALUADOS AÃšN.</td></tr>`;
+        html += `<tr><td colspan="3" style="text-align:center; color: var(--accent); font-weight:bold;">NO HAY REGISTROS EVALUADOS AÚN.</td></tr>`;
     } else {
         ranking.forEach((r, index) => {
             let claseFila = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : index < 10 ? "rank-top10" : "rank-normal";
-            let trofeo = index === 0 ? "ðŸ†" : index === 1 ? "ðŸ¥ˆ" : index === 2 ? "ðŸ¥‰" : `${index + 1}Â°`;
+            let trofeo = index === 0 ? "🏆" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}°`;
             html += `<tr class="${claseFila}">
                         <td>${trofeo}</td><td>${r.nombre} (CIP: ${r.cip})</td><td>${r.promedio} pts</td>
                      </tr>`;
@@ -823,7 +820,7 @@ function mostrarRankingCompetencia(idComp, nombreComp) {
     }
     
     html += `</tbody></table></div>
-             <div class="action-buttons"><button onclick="mostrarAdminListaCompetencias()" class="btn-secondary">â¬… Volver a competencias</button></div>`;
+             <div class="action-buttons"><button onclick="mostrarAdminListaCompetencias()" class="btn-secondary">⬅ Volver a competencias</button></div>`;
              
     document.getElementById('admin-dynamic-view').innerHTML = html;
 }
@@ -852,8 +849,8 @@ function mostrarAdminGestionDatos() {
     
     let html = `<h3>Base de Datos de Simulaciones</h3>
                 <div style="display:flex; gap:15px; margin-bottom: 20px;">
-                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;"> Borrar Seleccionados</button>
-                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;"> Vaciar Toda la Base</button>
+                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;">🗑️ Borrar Seleccionados</button>
+                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;">⚠️ Vaciar Toda la Base</button>
                 </div>
                 <div class="table-container">
                     <table>
@@ -873,7 +870,7 @@ function mostrarAdminGestionDatos() {
     // Necesitamos el Índice original para borrar exactamente ese registro
     let resultadosConIndex = resultados.map((r, index) => ({...r, originalIndex: index}));
     
-    // Mostrar del mÃ¡s nuevo al mÃ¡s viejo
+    // Mostrar del más nuevo al más viejo
     resultadosConIndex.reverse().forEach(r => {
         html += `<tr>
                     <td style="text-align: center;">
@@ -887,11 +884,11 @@ function mostrarAdminGestionDatos() {
     });
     
     if(resultados.length === 0) {
-        html += `<tr><td colspan="5" style="text-align:center;">La base de datos está¡ vacía.</td></tr>`;
+        html += `<tr><td colspan="5" style="text-align:center;">La base de datos está vacía.</td></tr>`;
     }
 
     html += `</tbody></table></div>
-             <div class="action-buttons"><button onclick="volverMenuAdmin()" class="btn-secondary">Volver al Menú Principal</button></div>`;
+             <div class="action-buttons"><button onclick="volverMenuAdmin()" class="btn-secondary">⬅ Volver al Menú Principal</button></div>`;
              
     document.getElementById('admin-dynamic-view').innerHTML = html;
 }
@@ -974,31 +971,31 @@ function verArbolDecision(indexGlobal) {
         let claseEval = paso.evaluacion.replace(/\s+/g, '');
         let ramasHtml = '';
         
-        // Verificamos si la simulaciÃ³n guardÃ³ las opciones (para los casos nuevos)
+        // Verificamos si la simulación guardó las opciones (para los casos nuevos)
         if(paso.opcionesDisponibles && paso.opcionesDisponibles.length > 0) {
             paso.opcionesDisponibles.forEach(opt => {
-                // Comparamos si esta fue la opciÃ³n que el alumno eligiÃ³
+                // Comparamos si esta fue la opción que el alumno eligió
                 let isChosen = (paso.decision === opt.texto) || (paso.decision.includes("NINGUNA") && paso.evaluacion === opt.tipo);
                 
                 if(isChosen) {
                     ramasHtml += `
                         <div class="tree-node-option tree-node-chosen ${claseEval}">
-                            <span style="font-size:0.7rem; color:#00ff00;">â–¶ RUTA ELEGIDA</span><br>
+                            <span style="font-size:0.7rem; color:#00ff00;">▶ RUTA ELEGIDA</span><br>
                             ${opt.texto}
                         </div>`;
                 } else {
                     ramasHtml += `
                         <div class="tree-node-option tree-node-unchosen">
-                            <span style="font-size:0.7rem; color:#888;">â–· Ruta descartada</span><br>
+                            <span style="font-size:0.7rem; color:#888;">▷ Ruta descartada</span><br>
                             ${opt.texto}
                         </div>`;
                 }
             });
         } else {
-            // Fallback por si intentan ver simulaciones viejas donde aÃºn no guardÃ¡bamos las opciones extra
+            // Fallback por si intentan ver simulaciones viejas donde aún no guardábamos las opciones extra
             ramasHtml += `
                 <div class="tree-node-option tree-node-chosen ${claseEval}">
-                    <strong>AcciÃ³n Tomada:</strong><br>${paso.decision}
+                    <strong>Acción Tomada:</strong><br>${paso.decision}
                 </div>
                 <div class="tree-node-option tree-node-unchosen">Rutas descartadas no registradas en versiones anteriores.</div>`;
         }
