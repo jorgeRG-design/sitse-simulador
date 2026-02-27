@@ -74,7 +74,8 @@ function toggleAuthMode() {
 // ==========================================
 // INICIALIZACIÓN UNIFICADA DE LA PLATAFORMA
 // ==========================================
-window.onload = function() {
+// Nota: Añadimos 'async' a la función para poder usar 'await' con la base de datos
+window.onload = async function() {
     renderizarCasos();
     
     // 1. VERIFICAR SI ES JURADO (Viene del QR)
@@ -82,11 +83,11 @@ window.onload = function() {
     let guestName = sessionStorage.getItem('sitse_guest_name');
     
     if (isGuest === 'true' && guestName) {
-        // SOLUCIÓN INVITADOS: Le damos un "CIP" único aleatorio (ej. INV-4512) para que no se mezclen
         let cipUnico = 'INV-' + Math.floor(Math.random() * 10000);
         usuarioActual = { nombres: guestName, rol: 'guest', cip: cipUnico };
         
-        aplicarRestriccionesInvitadoUI(); 
+        await sincronizarBaseDatos(); // Esperamos a que descargue Firebase
+        aplicarRestriccionesInvitadoUI(); // Esto oculta el loading y muestra el panel
         return; 
     }
 
@@ -95,22 +96,22 @@ window.onload = function() {
     if(savedUser) {
         usuarioActual = JSON.parse(savedUser);
         
-        // Parche de seguridad admin
         if(usuarioActual.rol === 'admin') {
             usuarioActual.cip = ADMIN_CRED.cip;
             localStorage.setItem('sitse_currentUser', JSON.stringify(usuarioActual));
         }
 
-        document.getElementById('login-screen').classList.add('hidden'); // Ocultar login
-        iniciarSesionUI();
+        await sincronizarBaseDatos(); // Esperamos a que descargue Firebase
+        iniciarSesionUI(); // Esto oculta el loading y muestra el panel
+        return;
     }
 
-    // 3. Ya no forzamos el evento del Enter aquí porque descubrí que 
-    // ya lo tienes puesto directamente en tu HTML (onkeypress). 
-    // Tenerlo doble causaba conflicto.
-    
-    // 4. Sincronizar datos silenciosamente al entrar
-    if (usuarioActual) sincronizarBaseDatos();
+    // 3. SI NO HAY NADIE LOGUEADO (Usuario nuevo)
+    // Ocultamos la pantalla de carga y mostramos el Login
+    // Le damos medio segundo de delay para que la transición sea suave a la vista
+    setTimeout(() => {
+        cambiarPantalla('login-screen');
+    }, 500);
 };
 
 // ==========================================
@@ -1019,3 +1020,4 @@ function cerrarArbol() {
     document.getElementById('tree-modal').style.display = 'none';
     document.getElementById('tree-modal').classList.add('hidden');
 }
+
