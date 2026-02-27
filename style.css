@@ -697,92 +697,111 @@ main {
 }
 
 /* ==========================================
-   DISEÑO COMPACTO PARA MÓVILES (ESTILO APP)
+   DISEÑO MÓVIL INTEGRAL (APP + CONSOLA JUEGO)
    ========================================== */
 @media (max-width: 768px) {
-    /* REDUCCIÓN DEL BANNER (NAVBAR) */
+    /* 1. NAVBAR COMPACTA (ESTILO APP) */
     .navbar { 
-        flex-direction: row !important; /* Forzamos que todo vaya en una línea */
-        padding: 8px 12px; 
-        height: auto;
-        justify-content: blink;
-        gap: 10px;
+        flex-direction: row !important; 
+        padding: 5px 10px; 
+        height: 60px; 
+        justify-content: space-between;
     }
-
     .nav-left { 
         flex-direction: row !important; 
-        align-items: center;
-        flex: 2; /* Le damos más espacio al título */
+        align-items: center; 
+        flex: 2; 
         gap: 8px;
     }
-
-    .nav-logo { 
-        height: 40px !important; /* Escudo más pequeño a la izquierda */
-        margin: 0 !important; 
-    }
-
+    .nav-logo { height: 35px !important; margin: 0 !important; }
     .nav-title h1 { 
-        font-size: 0.75rem !important; /* Letras pequeñas para el nombre del sistema */
-        text-align: left;
-        line-height: 1.1;
-        margin: 0;
+        font-size: 0.65rem !important; 
+        text-align: left; 
+        line-height: 1.1; 
     }
-
-    /* Ocultamos los links de navegación en móvil para ganar espacio (se accede por botones) */
     .nav-title nav { display: none; }
+    .nav-user { scale: 0.8; transform-origin: right; align-items: flex-end; }
+    .status-online { font-size: 0; }
+    .status-online::before { content: "●"; font-size: 14px; }
 
-    /* BLOQUE DE USUARIO A LA DERECHA */
-    .nav-user { 
-        flex: 1; 
-        align-items: flex-end !important; 
-        margin-top: 0 !important;
-        justify-content: center;
-    }
-
-    .user-name-text { 
-        font-size: 0.65rem !important; /* Nombre del invitado muy pequeño */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 80px;
-    }
-
-    .user-status-row { 
+    /* 2. CONSOLA DE ESTADÍSTICAS (PUNTAJE Y TIEMPO) */
+    .game-header { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr 1fr; /* Tres columnas iguales */
+        align-items: center; 
         gap: 5px; 
-        margin-top: 2px; 
+        padding: 5px; 
+        margin-bottom: 10px;
     }
-
-    .status-online { 
-        font-size: 0; /* Ocultamos el texto "En línea" */
+    .btn-back { 
+        width: 100% !important; 
+        padding: 8px 2px !important; 
+        font-size: 0.65rem !important; 
+        margin: 0 !important;
+        white-space: nowrap;
     }
-    
-    .status-online::before {
-        content: "●"; /* Dejamos solo el punto verde */
-        font-size: 14px;
-    }
-
-    .btn-logout { 
-        font-size: 0.7rem !important; /* Botón salir pequeño */
-        padding: 2px 5px;
-        border: 1px solid rgba(255,102,102,0.3);
+    .stats-bar { 
+        font-size: 0.75rem !important; 
+        text-align: center;
+        background: rgba(255,255,255,0.8);
+        padding: 5px;
         border-radius: 4px;
+        color: var(--pnp-dark);
+        font-weight: bold;
+    }
+    #timer-box { 
+        font-size: 0.75rem !important; 
+        width: 100% !important; 
+        padding: 8px 2px !important; 
+        margin: 0 !important;
     }
 
-    /* REDUCCIÓN DEL FOOTER */
-    .main-footer {
-        padding: 4px 0 !important;
+    /* 3. CONTENEDOR DEL SIMULADOR (EL CUADRADO MODERNO) */
+    .simulation-container {
+        flex-direction: column !important; 
+        padding: 10px !important;
+        gap: 10px !important;
+        border: 1px solid #ddd;
+        background: #fff;
+    }
+    .scene-visual { width: 100% !important; }
+    .scene-visual video, .scene-visual img {
+        max-height: 160px; /* Video más controlado */
+        object-fit: cover;
     }
 
-    .main-footer p {
-        font-size: 0.6rem !important; /* Letras del footer a la mitad */
-        margin: 1px 0;
+    /* 4. TEXTO IZQUIERDA Y BOTONES DERECHA */
+    .scene-control {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr; /* 55% texto, 45% botones */
+        gap: 10px;
+        align-items: start;
+        text-align: left;
+    }
+    #escena-titulo { font-size: 0.85rem; margin-bottom: 5px; color: var(--pnp-dark); }
+    #escena-texto { 
+        font-size: 0.7rem !important; 
+        line-height: 1.2; 
+        margin: 0;
+        color: #333;
+    }
+    .btn-grid { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 6px; 
+        margin-top: 0 !important;
+    }
+    .btn-decision { 
+        font-size: 0.65rem !important; 
+        padding: 6px !important; 
+        text-align: center;
+        width: 100%;
     }
 
-    /* AJUSTES DE PANTALLA PARA QUE EL CONTENIDO SUBA */
-    main { padding-bottom: 50px; }
-    .simulation-container { padding: 10px; gap: 10px; }
-    .btn-decision { font-size: 0.85rem; padding: 10px; }
-    #timer-box { font-size: 1rem; padding: 5px; }
+    /* 5. FOOTER MINIATURA */
+    .main-footer { padding: 4px 0 !important; }
+    .main-footer p { font-size: 0.55rem !important; margin: 1px 0; }
+    main { padding-bottom: 40px; }
 }
 
 /* ==========================================
