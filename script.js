@@ -144,12 +144,12 @@ function aplicarRestriccionesInvitadoUI() {
     cambiarPantalla('dashboard-screen');
 }
 
-function registrarUsuario() {
-    const nombres = document.getElementById('reg-nombres').value;
-    const grado = document.getElementById('reg-grado').value;
-    const correo = document.getElementById('reg-correo').value;
-    const cip = document.getElementById('reg-cip').value;
-    const dni = document.getElementById('reg-dni').value;
+async function registrarUsuario() {
+    const nombres = document.getElementById('reg-nombres').value.trim();
+    const grado = document.getElementById('reg-grado').value.trim();
+    const correo = document.getElementById('reg-correo').value.trim();
+    const cip = document.getElementById('reg-cip').value.trim();
+    const dni = document.getElementById('reg-dni').value.trim();
 
     if(!nombres || !cip || !dni) {
         alert("Nombres, CIP y DNI son obligatorios.");
@@ -158,24 +158,31 @@ function registrarUsuario() {
 
     const newUser = { nombres, grado, correo, cip, dni, rol: 'user' };
     
-    // Guardar en Firebase (Simulado localmente para la demo)
-    let users = JSON.parse(localStorage.getItem('sitse_users')) || [];
-    if(users.find(u => u.cip === cip)) {
-        alert("El CIP ya está registrado.");
-        return;
-    }
-    users.push(newUser);
-    localStorage.setItem('sitse_users', JSON.stringify(users));
+    try {
+        // 1. Verificamos en la nube si el CIP ya existe
+        const snapshot = await db.collection("usuarios_sitse").where("cip", "==", cip).get();
+        if (!snapshot.empty) {
+            alert("El CIP ya está registrado en el sistema central.");
+            return;
+        }
 
-    document.getElementById('reg-msg').innerText = "Registro exitoso. Su usuario es su CIP y contraseña su DNI.";
-    setTimeout(toggleAuthMode, 2000);
+        // 2. Si no existe, lo guardamos en FIREBASE
+        await db.collection("usuarios_sitse").add(newUser);
+
+        document.getElementById('reg-msg').innerText = "Registro exitoso en la nube. Su usuario es su CIP y contraseña su DNI.";
+        setTimeout(toggleAuthMode, 2000);
+
+    } catch (error) {
+        console.error("Error al registrar en la nube:", error);
+        alert("Hubo un error de conexión al registrar el usuario.");
+    }
 }
 
-function intentarLogin() {
+async function intentarLogin() {
     const cip = document.getElementById('input-cip').value.trim();
     const dni = document.getElementById('input-dni').value.trim();
     
-    // Verificación de Administrador
+    // Verificación de Administrador (Sigue igual, como puerta trasera segura)
     if(cip === ADMIN_CRED.cip && dni === ADMIN_CRED.dni) {
         usuarioActual = { nombres: "Crnl. PNP Manuel ZURITA (Admin)", rol: 'admin', cip: ADMIN_CRED.cip };
         localStorage.setItem('sitse_currentUser', JSON.stringify(usuarioActual)); 
@@ -183,16 +190,26 @@ function intentarLogin() {
         return;
     }
 
-    // Verificación de Usuario Normal
-    let users = JSON.parse(localStorage.getItem('sitse_users')) || [];
-    let user = users.find(u => u.cip === cip && u.dni === dni);
-
-    if (user) {
-        usuarioActual = user;
-        localStorage.setItem('sitse_currentUser', JSON.stringify(usuarioActual)); 
-        iniciarSesionUI();
-    } else {
-        document.getElementById('error-msg').innerText = "Credenciales incorrectas.";
+    try {
+        document.getElementById('error-msg').innerText = "Verificando credenciales en la nube...";
+        
+        // Buscar en FIREBASE
+        const snapshot = await db.collection("usuarios_sitse")
+                                 .where("cip", "==", cip)
+                                 .where("dni", "==", dni).get();
+        
+        if (!snapshot.empty) {
+            // Usuario encontrado
+            usuarioActual = snapshot.docs[0].data();
+            localStorage.setItem('sitse_currentUser', JSON.stringify(usuarioActual)); 
+            document.getElementById('error-msg').innerText = "";
+            iniciarSesionUI();
+        } else {
+            document.getElementById('error-msg').innerText = "Credenciales incorrectas o usuario no registrado.";
+        }
+    } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        document.getElementById('error-msg').innerText = "Error de conexión con el servidor.";
     }
 }
 
@@ -668,18 +685,29 @@ function volverMenuAdmin() {
 }
 
 // --- OPCIÓN 1: USUARIOS ---
-function mostrarAdminUsuarios() {
+async function mostrarAdminUsuarios() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
     document.getElementById('admin-breadcrumb').innerText = "Menú Principal > Personal Evaluado";
     
+    // Mensaje de carga mientras baja la lista de usuarios
+    document.getElementById('admin-dynamic-view').innerHTML = '<h3 style="text-align:center; color:var(--pnp-dark); margin-top:40px;">Cargando personal de la nube... ⏳</h3>';
+    
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
-    let usuariosRegistrados = JSON.parse(localStorage.getItem('sitse_users')) || [];
+    let usuariosRegistrados = [];
+    
+    // DESCARGAR USUARIOS DESDE FIREBASE
+    try {
+        const snapUsers = await db.collection("usuarios_sitse").get();
+        snapUsers.forEach(doc => usuariosRegistrados.push(doc.data()));
+    } catch(e) {
+        console.error("Error cargando usuarios:", e);
+    }
     
     // Diccionario para agrupar usuarios únicos
     let usuariosUnicos = {};
     
-    // 1. Añadimos a los registrados por defecto
+    // 1. Añadimos a los registrados de la nube
     usuariosRegistrados.forEach(u => {
         usuariosUnicos[u.cip] = { nombres: u.nombres, cip: u.cip, total: 0 };
     });
