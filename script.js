@@ -16,6 +16,36 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ==========================================
+// NUEVA FUNCIÓN: PUENTE FIREBASE -> LOCAL
+// ==========================================
+async function sincronizarBaseDatos() {
+    try {
+        // Obtenemos todos los resultados de Firebase ordenados por fecha
+        const snapshot = await db.collection("resultados_sitse").orderBy("timestamp", "asc").get();
+        let resultadosNube = [];
+        
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            data.id_firebase = doc.id; // Guardamos el ID real de la base de datos
+            
+            // Formatear la fecha si viene de Firebase
+            if (data.timestamp && data.timestamp.toDate) {
+                data.fecha = data.timestamp.toDate().toLocaleString();
+            }
+            resultadosNube.push(data);
+        });
+
+        // Actualizamos la memoria local para que las tablas se armen con datos reales
+        localStorage.setItem('sitse_resultados', JSON.stringify(resultadosNube));
+        return resultadosNube;
+        
+    } catch (error) {
+        console.error("Error al sincronizar con Firebase:", error);
+        return JSON.parse(localStorage.getItem('sitse_resultados')) || [];
+    }
+}
+
+// ==========================================
 // 2. GESTIÓN DE USUARIOS Y AUTENTICACIÓN
 // ==========================================
 let usuarioActual = null;
@@ -495,10 +525,23 @@ function guardarComentarioAdmin(indexGlobal, pasoIndex) {
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     if(resultados[indexGlobal] && resultados[indexGlobal].detalle[pasoIndex]) {
         resultados[indexGlobal].detalle[pasoIndex].comentarioInstructor = texto;
-        resultados[indexGlobal].detalle[pasoIndex].comentarioLeido = false; // Al editarlo, vuelve a ser "no leÃ­do" para el alumno
+        resultados[indexGlobal].detalle[pasoIndex].comentarioLeido = false; 
+        
+        // 1. Actualizamos localmente
         localStorage.setItem('sitse_resultados', JSON.stringify(resultados));
-        alert("Comentario guardado correctamente.");
-        verDetalleGuardado(indexGlobal); // Recargar la vista
+        
+        // 2. Subimos el cambio a FIREBASE
+        let idDoc = resultados[indexGlobal].id_firebase;
+        if(idDoc) {
+            db.collection("resultados_sitse").doc(idDoc).update({
+                detalle: resultados[indexGlobal].detalle
+            }).then(() => {
+                alert("Observación del instructor registrada en la nube central.");
+                verDetalleGuardado(indexGlobal);
+            }).catch(error => console.error("Error al guardar nota:", error));
+        } else {
+             alert("Error: Este registro no tiene ID de la nube.");
+        }
     }
 }
 
@@ -539,20 +582,25 @@ function actualizarNotificaciones() {
     }
 }
 
-function verResultadosHistorial() {
+async function verResultadosHistorial() {
     cambiarPantalla('history-screen');
-    let resultadosGlobales = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     const tbody = document.querySelector('#tabla-resultados tbody');
+    
+    // Mensaje de espera para el usuario
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; font-weight:bold; color:var(--pnp-dark);">Sincronizando expedientes desde la base central... ⏳</td></tr>';
+    
+    // Ejecutamos la sincronización con Firebase
+    let resultadosGlobales = await sincronizarBaseDatos();
+    
     tbody.innerHTML = '';
     
     for (let i = resultadosGlobales.length - 1; i >= 0; i--) {
         let r = resultadosGlobales[i];
         
         if (r.usuario === usuarioActual.cip) {
-            // Solo resaltar si hay comentarios NO leÃ­dos
             let tieneComentariosNuevos = r.detalle.some(d => d.comentarioInstructor && !d.comentarioLeido);
             let claseFila = tieneComentariosNuevos ? "row-has-comment" : "";
-            let indicativo = tieneComentariosNuevos ? "ðŸ’¡ " : "";
+            let indicativo = tieneComentariosNuevos ? "💡 " : "";
             
             tbody.innerHTML += `
                 <tr class="${claseFila}">
@@ -564,16 +612,22 @@ function verResultadosHistorial() {
                 </tr>`;
         }
     }
-    actualizarNotificaciones(); // Refrescar el foco
+    actualizarNotificaciones();
 }
 
 // ==========================================
 // LÃ“GICA DEL NUEVO PANEL ADMIN MULTINIVEL
 // ==========================================
 
-function verPanelAdmin() {
+async function verPanelAdmin() {
     cambiarPantalla('admin-screen');
-    volverMenuAdmin(); // Asegura que siempre inicie en los 3 botones
+    
+    // Bloqueamos la vista un segundo mientras descargamos los datos frescos
+    document.getElementById('admin-dynamic-view').innerHTML = '<h3 style="text-align:center; color:var(--pnp-dark); margin-top:40px;">Sincronizando expedientes desde la nube... ⏳</h3>';
+    
+    await sincronizarBaseDatos(); 
+    
+    volverMenuAdmin(); 
 }
 
 function volverMenuAdmin() {
@@ -915,4 +969,5 @@ function cerrarArbol() {
     document.getElementById('tree-modal').classList.add('hidden');
 
 }
+
 
