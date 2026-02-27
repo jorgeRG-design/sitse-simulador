@@ -208,7 +208,17 @@ function iniciarSesionUI() {
 }
 
 function logout() { 
-    localStorage.removeItem('sitse_currentUser'); // Borrar sesión al salir
+    // 1. Borramos la sesión de usuario normal (localStorage)
+    localStorage.removeItem('sitse_currentUser'); 
+    
+    // 2. Borramos la sesión del invitado (sessionStorage)
+    sessionStorage.removeItem('sitse_guest_name');
+    sessionStorage.removeItem('sitse_is_guest');
+    
+    // 3. Opcional: Limpiar cualquier rastro de caché del jurado
+    sessionStorage.clear();
+
+    // 4. Recargamos la página para volver al inicio limpio
     location.reload(); 
 }
 
@@ -836,6 +846,7 @@ async function borrarRegistroAdmin(indexReal) {
             await sincronizarBaseDatos();
             alert("Expediente eliminado.");
             verPanelAdmin(); // Te devuelve al menú principal para refrescar
+
         }
     }
 }
@@ -1021,3 +1032,29 @@ function cerrarArbol() {
     document.getElementById('tree-modal').classList.add('hidden');
 }
 
+// ==========================================
+// CONTROL DE INACTIVIDAD (10 MINUTOS)
+// ==========================================
+let temporizadorInactividad;
+
+function resetearTemporizador() {
+    // Si no hay nadie logueado, no hace falta contar
+    if (!usuarioActual) return;
+
+    clearTimeout(temporizadorInactividad);
+    
+    // 10 minutos = 600,000 milisegundos
+    temporizadorInactividad = setTimeout(() => {
+        alert("Sesión finalizada por inactividad (10 minutos).");
+        logout();
+    }, 600000); 
+}
+
+// Escuchar cualquier actividad del usuario
+window.onmousemove = resetearTemporizador;
+window.onkeypress = resetearTemporizador;
+window.onclick = resetearTemporizador;
+window.onscroll = resetearTemporizador;
+
+// Iniciar el conteo apenas carga la página
+resetearTemporizador();
