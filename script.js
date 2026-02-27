@@ -15,6 +15,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+
 // ==========================================
 // NUEVA FUNCIÓN: PUENTE FIREBASE -> LOCAL
 // ==========================================
@@ -106,7 +107,7 @@ window.onload = function() {
 };
 
 // ==========================================
-// FUNCIONES INVITADOS
+// FUNCIONES PARA INVITADOS
 // ==========================================
 function aplicarRestriccionesInvitadoUI() {
     // 1. Ponemos el nombre del jurado en la esquina superior derecha
@@ -389,15 +390,14 @@ function finalizarSimulacion(textoFinal) {
     };
 
     // GUARDAR EN FIREBASE (LA NUBE)
-    // GUARDAR EN FIREBASE (LA NUBE)
 	db.collection("resultados_sitse").add(resultado)
 	.then(async (docRef) => { // <-- Añade 'async' aquí
-	    console.log("Misión registrada en la nube con ID: ", docRef.id);
-	    
-	    // <-- AÑADE ESTA LÍNEA para actualizar la memoria al instante
-	    await sincronizarBaseDatos(); 
-	    
-	    generarInformeFinal(resultado, textoFinal);
+		console.log("Misión registrada en la nube con ID: ", docRef.id);
+
+		// <-- AÑADE ESTA LÍNEA para actualizar la memoria al instante
+		await sincronizarBaseDatos(); 
+
+		generarInformeFinal(resultado, textoFinal);
 	})
     .catch((error) => {
         console.error("Error al guardar el expediente: ", error);
@@ -456,7 +456,7 @@ function generarInformeFinal(res, textoFinal, indexGlobal = null) {
             let valorActual = d.comentarioInstructor ? d.comentarioInstructor : "";
             html += `
                 <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
-                    <textarea id="comentario-admin-${pasoIndex}" class="admin-textarea" placeholder="Escriba un comentario o correcciÃ³n aquÃ­...">${valorActual}</textarea>
+                    <textarea id="comentario-admin-${pasoIndex}" class="admin-textarea" placeholder="Escriba un comentario o corrección aquí...">${valorActual}</textarea>
                     <div style="margin-top:5px;">
                         <button onclick="guardarComentarioAdmin(${indexGlobal}, ${pasoIndex})" class="btn-sm" style="background:#0288d1;">Guardar Comentario</button>
                         ${d.comentarioInstructor ? `<button onclick="borrarComentarioAdmin(${indexGlobal}, ${pasoIndex})" class="btn-sm" style="background:var(--danger); margin-left:10px;">Borrar</button>` : ''}
@@ -819,7 +819,7 @@ function mostrarRankingCompetencia(idComp, nombreComp) {
 }
 
 function borrarRegistroAdmin(indexReal) {
-    if(confirm("Â¿Eliminar este expediente operativo permanentemente?")) {
+    if(confirm("¿Eliminar este expediente operativo permanentemente?")) {
         let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
         // Al estar ordenado, el index no coincide directo, habrÃ­a que buscar el ID, pero simplificamos para la demo:
         resultados.splice(indexReal, 1); 
@@ -828,18 +828,19 @@ function borrarRegistroAdmin(indexReal) {
     }
 }
 
+
 // --- OPCIÃ“N 4: GESTIÃ“N DE DATOS Y BORRADO MASIVO ---
 function mostrarAdminGestionDatos() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
-    document.getElementById('admin-breadcrumb').innerText = "MenÃº Principal > GestiÃ³n de Registros";
+    document.getElementById('admin-breadcrumb').innerText = "Menú Principal > Gestión de Registros";
     
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     
     let html = `<h3>Base de Datos de Simulaciones</h3>
                 <div style="display:flex; gap:15px; margin-bottom: 20px;">
-                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;">ðŸ—‘ï¸ Borrar Seleccionados</button>
-                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;">âš ï¸ Vaciar Toda la Base</button>
+                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;"> Borrar Seleccionados</button>
+                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;"> Vaciar Toda la Base</button>
                 </div>
                 <div class="table-container">
                     <table>
@@ -873,11 +874,11 @@ function mostrarAdminGestionDatos() {
     });
     
     if(resultados.length === 0) {
-        html += `<tr><td colspan="5" style="text-align:center;">La base de datos estÃ¡ vacÃ­a.</td></tr>`;
+        html += `<tr><td colspan="5" style="text-align:center;">La base de datos está¡ vacía.</td></tr>`;
     }
 
     html += `</tbody></table></div>
-             <div class="action-buttons"><button onclick="volverMenuAdmin()" class="btn-secondary">â¬… Volver al MenÃº Principal</button></div>`;
+             <div class="action-buttons"><button onclick="volverMenuAdmin()" class="btn-secondary">Volver al Menú Principal</button></div>`;
              
     document.getElementById('admin-dynamic-view').innerHTML = html;
 }
@@ -895,7 +896,7 @@ function borrarSeleccionados() {
         return;
     }
     
-    if(confirm(`Â¿EstÃ¡ seguro de eliminar ${checkboxes.length} registro(s)? Esta acciÃ³n actualizarÃ¡ los rankings y no se puede deshacer.`)) {
+    if(confirm(`¿Está seguro de eliminar ${checkboxes.length} registro(s)? Esta acción actualizará los rankings y no se puede deshacer.`)) {
         let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
         
         // Obtener los Ã­ndices a borrar y ordenarlos de mayor a menor 
@@ -913,14 +914,14 @@ function borrarSeleccionados() {
 }
 
 function vaciarBaseDatos() {
-    if(confirm("Â¡ADVERTENCIA CRÃTICA!\n\nÂ¿EstÃ¡ absolutamente seguro de querer VACIAR TODA LA BASE DE DATOS?\nSe perderÃ¡n todos los resultados y rankings de TODOS los usuarios.")) {
-        let checkExtra = prompt("Escriba la palabra 'BORRAR' (en mayÃºsculas) para confirmar:");
+    if(confirm("Â¡ADVERTENCIA CRÍTICA!\n\nÂ¿Está absolutamente seguro de querer VACIAR TODA LA BASE DE DATOS?\nSe perderán todos los resultados y rankings de TODOS los usuarios.")) {
+        let checkExtra = prompt("Escriba la palabra 'BORRAR' (en mayúsculas) para confirmar:");
         if(checkExtra === 'BORRAR') {
             localStorage.removeItem('sitse_resultados'); // Elimina la clave completa
             alert("La base de datos ha sido vaciada exitosamente.");
             mostrarAdminGestionDatos(); // Refrescar la tabla
         } else {
-            alert("Palabra incorrecta. OperaciÃ³n cancelada por seguridad.");
+            alert("Palabra incorrecta. Operación cancelada por seguridad.");
         }
     }
 }
@@ -988,8 +989,4 @@ function verArbolDecision(indexGlobal) {
 function cerrarArbol() {
     document.getElementById('tree-modal').style.display = 'none';
     document.getElementById('tree-modal').classList.add('hidden');
-
 }
-
-
-
