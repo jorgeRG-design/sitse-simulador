@@ -229,7 +229,12 @@ function logout() {
 // ==========================================
 function cambiarPantalla(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+    const targetScreen = document.getElementById(id);
+    targetScreen.classList.remove('hidden');
+    
+    // PARCHE: Forzar visualización de elementos con animación para evitar pantallas en blanco
+    targetScreen.querySelectorAll('.fade-element').forEach(el => el.classList.add('visible'));
+    
     if(id !== 'game-screen') detenerTimer();
 }
 
