@@ -674,7 +674,7 @@ main {
 
 .expert-card-pano .expert-text {
     width: 45%; /* El texto ocupa solo la mitad derecha */
-    padding: 15px
+    padding: 15px;
 	position: relative;
     z-index: 2;
     text-align: right; /* Alineamos el texto a la derecha para que se vea elegante */
@@ -694,4 +694,34 @@ main {
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
+
+}
+
+/* ==========================================
+   CORRECCIONES RESPONSIVAS (MÓVILES)
+   ========================================== */
+@media (max-width: 768px) {
+    /* Navbar más compacta y apilada */
+    .navbar { flex-direction: column; padding: 10px; text-align: center; }
+    .nav-left { flex-direction: column; width: 100%; }
+    .nav-logo { height: 45px !important; margin: 0 auto; }
+    .nav-title h1 { font-size: 1rem; line-height: 1.3; white-space: normal; }
+    .nav-title nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+    .nav-user { align-items: center; margin-top: 15px; width: 100%; justify-content: center; }
+    .user-name-text { font-size: 1rem; }
+
+    /* Cabecera del Juego (Botones apilados) */
+    .game-header { flex-direction: column; gap: 10px; text-align: center; margin-bottom: 10px; }
+    .game-header .btn-back { width: 100%; padding: 10px; font-size: 0.9rem; }
+    #timer-box { font-size: 1.2rem; width: 100%; text-align: center; box-sizing: border-box; }
+    .stats-bar { width: 100%; font-size: 1.1rem; }
+
+    /* Contenedor del Simulador (Video arriba, Botones abajo) */
+    .simulation-container { flex-direction: column; padding: 15px; gap: 15px; }
+    .scene-visual { width: 100%; }
+    .scene-control { width: 100%; }
+    .btn-decision { font-size: 0.9rem; padding: 12px; }
+    
+    /* Textos del caso */
+    #escena-texto { font-size: 0.95rem; line-height: 1.4; }
 }
