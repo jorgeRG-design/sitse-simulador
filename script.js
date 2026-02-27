@@ -11,37 +11,43 @@ const firebaseConfig = {
 	messagingSenderId: "96701502418",
 	appId: "1:96701502418:web:ba18709948e18838f8ae0b"
 };
+
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
 
 // ==========================================
 // NUEVA FUNCIÓN: PUENTE FIREBASE -> LOCAL
 // ==========================================
 async function sincronizarBaseDatos() {
     try {
-        // Obtenemos todos los resultados de Firebase ordenados por fecha
-        const snapshot = await db.collection("resultados_sitse").orderBy("timestamp", "asc").get();
+        // Quitamos el 'orderBy' de Firebase para evitar el error de índice que bloquea tu código
+        const snapshot = await db.collection("resultados_sitse").get();
         let resultadosNube = [];
         
         snapshot.forEach(doc => {
             let data = doc.data();
             data.id_firebase = doc.id; // Guardamos el ID real de la base de datos
             
-            // Formatear la fecha si viene de Firebase
+            // Convertimos la fecha para poder ordenarla
             if (data.timestamp && data.timestamp.toDate) {
+                data.fechaReal = data.timestamp.toDate().getTime();
                 data.fecha = data.timestamp.toDate().toLocaleString();
+            } else {
+                data.fechaReal = 0;
             }
             resultadosNube.push(data);
         });
 
-        // Actualizamos la memoria local para que las tablas se armen con datos reales
+        // Ordenamos los expedientes de más antiguo a más nuevo aquí mismo (sin depender de Firebase)
+        resultadosNube.sort((a, b) => a.fechaReal - b.fechaReal);
+
+        // Actualizamos la memoria local
         localStorage.setItem('sitse_resultados', JSON.stringify(resultadosNube));
         return resultadosNube;
         
     } catch (error) {
-        console.error("Error al sincronizar con Firebase:", error);
+        console.error("Error crítico al sincronizar con Firebase:", error);
         return JSON.parse(localStorage.getItem('sitse_resultados')) || [];
     }
 }
@@ -68,6 +74,9 @@ function toggleAuthMode() {
 // ==========================================
 // INICIALIZACIÓN UNIFICADA DE LA PLATAFORMA
 // ==========================================
+// ==========================================
+// INICIALIZACIÓN UNIFICADA DE LA PLATAFORMA
+// ==========================================
 window.onload = function() {
     renderizarCasos();
     
@@ -76,9 +85,12 @@ window.onload = function() {
     let guestName = sessionStorage.getItem('sitse_guest_name');
     
     if (isGuest === 'true' && guestName) {
-        usuarioActual = { nombres: guestName, rol: 'guest', cip: 'INVITADO' };
+        // SOLUCIÓN INVITADOS: Le damos un "CIP" único aleatorio (ej. INV-4512) para que no se mezclen
+        let cipUnico = 'INV-' + Math.floor(Math.random() * 10000);
+        usuarioActual = { nombres: guestName, rol: 'guest', cip: cipUnico };
+        
         aplicarRestriccionesInvitadoUI(); 
-        return; // IMPORTANTE: Detiene la ejecución aquí para que no pida login normal
+        return; 
     }
 
     // 2. VERIFICAR USUARIO NORMAL (Policía o Admin)
@@ -94,16 +106,14 @@ window.onload = function() {
 
         document.getElementById('login-screen').classList.add('hidden'); // Ocultar login
         iniciarSesionUI();
-		sincronizarBaseDatos();
     }
 
-    // 3. EVENTOS DE TECLADO PARA LOGIN NORMAL
-    document.getElementById('input-cip').addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') intentarLogin();
-    });
-    document.getElementById('input-dni').addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') intentarLogin();
-    });
+    // 3. Ya no forzamos el evento del Enter aquí porque descubrí que 
+    // ya lo tienes puesto directamente en tu HTML (onkeypress). 
+    // Tenerlo doble causaba conflicto.
+    
+    // 4. Sincronizar datos silenciosamente al entrar
+    if (usuarioActual) sincronizarBaseDatos();
 };
 
 // ==========================================
@@ -818,18 +828,21 @@ function mostrarRankingCompetencia(idComp, nombreComp) {
     document.getElementById('admin-dynamic-view').innerHTML = html;
 }
 
-function borrarRegistroAdmin(indexReal) {
-    if(confirm("¿Eliminar este expediente operativo permanentemente?")) {
+async function borrarRegistroAdmin(indexReal) {
+    if(confirm("¿Eliminar este expediente operativo permanentemente de la nube?")) {
         let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
-        // Al estar ordenado, el index no coincide directo, habrÃ­a que buscar el ID, pero simplificamos para la demo:
-        resultados.splice(indexReal, 1); 
-        localStorage.setItem('sitse_resultados', JSON.stringify(resultados));
-        verPanelAdmin();
+        let idF = resultados[indexReal].id_firebase;
+        
+        if(idF) {
+            await db.collection("resultados_sitse").doc(idF).delete();
+            await sincronizarBaseDatos();
+            alert("Expediente eliminado.");
+            verPanelAdmin(); // Te devuelve al menú principal para refrescar
+        }
     }
 }
 
-
-// --- OPCIÃ“N 4: GESTIÃ“N DE DATOS Y BORRADO MASIVO ---
+// --- OPCIÓN 4: GESTIÓN DE DATOS Y BORRADO MASIVO ---
 function mostrarAdminGestionDatos() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
@@ -839,8 +852,8 @@ function mostrarAdminGestionDatos() {
     
     let html = `<h3>Base de Datos de Simulaciones</h3>
                 <div style="display:flex; gap:15px; margin-bottom: 20px;">
-                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;">Borrar Seleccionados</button>
-                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;">Vaciar Toda la Base</button>
+                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;"> Borrar Seleccionados</button>
+                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;"> Vaciar Toda la Base</button>
                 </div>
                 <div class="table-container">
                     <table>
@@ -857,7 +870,7 @@ function mostrarAdminGestionDatos() {
                         </thead>
                         <tbody>`;
     
-    // Necesitamos el Ã­ndice original para borrar exactamente ese registro
+    // Necesitamos el Índice original para borrar exactamente ese registro
     let resultadosConIndex = resultados.map((r, index) => ({...r, originalIndex: index}));
     
     // Mostrar del mÃ¡s nuevo al mÃ¡s viejo
@@ -889,7 +902,7 @@ function toggleSelectAll() {
     checkboxes.forEach(chk => chk.checked = chkAll);
 }
 
-function borrarSeleccionados() {
+async function borrarSeleccionados() {
     let checkboxes = document.querySelectorAll('.chk-record:checked');
     if(checkboxes.length === 0) {
         alert("Seleccione al menos un registro de la lista para borrar.");
@@ -897,29 +910,48 @@ function borrarSeleccionados() {
     }
     
     if(confirm(`¿Está seguro de eliminar ${checkboxes.length} registro(s)? Esta acción actualizará los rankings y no se puede deshacer.`)) {
+        // Ponemos un mensaje de carga para que el administrador espere
+        document.getElementById('admin-dynamic-view').innerHTML = '<h3 style="text-align:center; color:var(--warning); margin-top:40px;">Eliminando registros de la nube central... ⏳</h3>';
+
         let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
-        
-        // Obtener los Ã­ndices a borrar y ordenarlos de mayor a menor 
-        // (Es vital borrar de atrÃ¡s hacia adelante para que no se muevan las posiciones del array)
         let indices = Array.from(checkboxes).map(chk => parseInt(chk.value));
-        indices.sort((a, b) => b - a);
         
-        indices.forEach(idx => {
-            resultados.splice(idx, 1);
-        });
+        // Borramos cada documento directamente de Firebase
+        for (let idx of indices) {
+            let idF = resultados[idx].id_firebase;
+            if(idF) {
+                await db.collection("resultados_sitse").doc(idF).delete();
+            }
+        }
         
-        localStorage.setItem('sitse_resultados', JSON.stringify(resultados));
-        mostrarAdminGestionDatos(); // Refrescar la tabla automÃ¡ticamente
+        // Descargamos la base de datos limpia y recargamos la tabla
+        await sincronizarBaseDatos();
+        mostrarAdminGestionDatos(); 
+        alert("Registros eliminados exitosamente de la base de datos central.");
     }
 }
 
-function vaciarBaseDatos() {
-    if(confirm("Â¡ADVERTENCIA CRÍTICA!\n\nÂ¿Está absolutamente seguro de querer VACIAR TODA LA BASE DE DATOS?\nSe perderán todos los resultados y rankings de TODOS los usuarios.")) {
+async function vaciarBaseDatos() {
+    if(confirm("¡ADVERTENCIA CRÍTICA!\n\n¿Está absolutamente seguro de querer VACIAR TODA LA BASE DE DATOS EN LA NUBE?\nSe perderán todos los resultados y rankings de TODOS los usuarios.")) {
         let checkExtra = prompt("Escriba la palabra 'BORRAR' (en mayúsculas) para confirmar:");
+        
         if(checkExtra === 'BORRAR') {
-            localStorage.removeItem('sitse_resultados'); // Elimina la clave completa
-            alert("La base de datos ha sido vaciada exitosamente.");
-            mostrarAdminGestionDatos(); // Refrescar la tabla
+            document.getElementById('admin-dynamic-view').innerHTML = '<h3 style="text-align:center; color:var(--danger); margin-top:40px;">Vaciando toda la base de datos en la nube... ⏳</h3>';
+
+            let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
+            
+            // Borramos absolutamente todos los registros de Firebase
+            for (let r of resultados) {
+                if(r.id_firebase) {
+                    await db.collection("resultados_sitse").doc(r.id_firebase).delete();
+                }
+            }
+
+            // Limpiamos la memoria local y recargamos la vista
+            localStorage.removeItem('sitse_resultados');
+            await sincronizarBaseDatos();
+            mostrarAdminGestionDatos(); 
+            alert("La base de datos en la nube ha sido vaciada exitosamente.");
         } else {
             alert("Palabra incorrecta. Operación cancelada por seguridad.");
         }
@@ -990,4 +1022,3 @@ function cerrarArbol() {
     document.getElementById('tree-modal').style.display = 'none';
     document.getElementById('tree-modal').classList.add('hidden');
 }
-
