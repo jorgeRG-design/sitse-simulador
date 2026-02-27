@@ -34,9 +34,8 @@ function toggleAuthMode() {
     document.getElementById('reg-msg').innerText = '';
 }
 
-// Configurar tecla ENTER e inicializar UI al cargar la pÃ¡gina
 // ==========================================
-// REEMPLAZA TU window.onload ACTUAL POR ESTO
+// INICIALIZACIÓN UNIFICADA DE LA PLATAFORMA
 // ==========================================
 window.onload = function() {
     renderizarCasos();
@@ -47,7 +46,7 @@ window.onload = function() {
     
     if (isGuest === 'true' && guestName) {
         usuarioActual = { nombres: guestName, rol: 'guest', cip: 'INVITADO' };
-        aplicarRestriccionesInvitadoUI(); // Ejecuta la pantalla limitada
+        aplicarRestriccionesInvitadoUI(); 
         return; // IMPORTANTE: Detiene la ejecución aquí para que no pida login normal
     }
 
@@ -66,7 +65,7 @@ window.onload = function() {
         iniciarSesionUI();
     }
 
-    // Eventos ENTER para Login
+    // 3. EVENTOS DE TECLADO PARA LOGIN NORMAL
     document.getElementById('input-cip').addEventListener('keypress', function(e) {
         if(e.key === 'Enter') intentarLogin();
     });
@@ -754,34 +753,6 @@ function borrarRegistroAdmin(indexReal) {
     }
 }
 
-// Configurar tecla ENTER e inicializar UI al cargar la pÃ¡gina
-window.onload = function() {
-    renderizarCasos();
-    
-    // Recuperar sesiÃ³n si existe (evita que el F5 te saque)
-    let savedUser = localStorage.getItem('sitse_currentUser');
-    if(savedUser) {
-        usuarioActual = JSON.parse(savedUser);
-        
-        // PARCHE: Si por error de cachÃ© el navegador guardÃ³ al admin antiguo, lo corregimos a la fuerza
-        if(usuarioActual.rol === 'admin') {
-            usuarioActual.cip = ADMIN_CRED.cip;
-            localStorage.setItem('sitse_currentUser', JSON.stringify(usuarioActual));
-        }
-
-        document.getElementById('login-screen').classList.add('hidden'); // Ocultar login
-        iniciarSesionUI();
-    }
-
-    // Eventos ENTER para Login
-    document.getElementById('input-cip').addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') intentarLogin();
-    });
-    document.getElementById('input-dni').addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') intentarLogin();
-    });
-};
-
 // --- OPCIÃ“N 4: GESTIÃ“N DE DATOS Y BORRADO MASIVO ---
 function mostrarAdminGestionDatos() {
     document.getElementById('admin-menu').classList.add('hidden');
@@ -944,3 +915,4 @@ function cerrarArbol() {
     document.getElementById('tree-modal').classList.add('hidden');
 
 }
+
