@@ -48,7 +48,13 @@
     </header>
 
     <main>
-        <section id="login-screen" class="screen active">
+        <section id="loading-screen" class="screen active" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 60vh;">
+            <img src="Imagenes/escudoPNP.png" alt="Cargando..." class="spin-animation" style="width: 120px; margin-bottom: 20px;">
+            <h2 style="color: var(--pnp-dark);">Sincronizando Sistema SITSE...</h2>
+            <p style="color: #666;">Verificando credenciales y expedientes en la nube central.</p>
+        </section>
+        
+        <section id="login-screen" class="screen hidden">
             <div class="login-hero">
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
@@ -328,3 +334,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
