@@ -54,17 +54,35 @@ main { flex: 1; padding-bottom: 120px; }
     letter-spacing: 1px;
 }
 .nav-title nav { margin-top: 5px; }
+/* ==========================================
+   ESTILOS DE NAVEGACIÓN Y HOVER (CUADRO)
+   ========================================== */
+.hamburger-btn {
+    display: none; /* Oculto en PC */
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0 10px 0 0;
+    line-height: 1;
+}
+
 .nav-title nav a {
-    margin-right: 15px; 
+    margin-right: 5px; 
     text-decoration: none; 
     color: #cccccc; 
     font-size: 0.95rem; 
     font-weight: 600; 
-    transition: 0.3s;
+    padding: 8px 12px; /* Creamos el espacio del cuadro */
+    border-radius: 6px; /* Bordes redondeados */
+    transition: all 0.3s ease;
 }
+
 .nav-title nav a:hover { 
     color: #ffffff; 
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); 
+    background-color: rgba(255, 255, 255, 0.2); /* El cuadro semitransparente al pasar el mouse */
+    text-shadow: none; 
 }
 
 /* HERO & LOGIN */
@@ -701,7 +719,46 @@ main {
    ========================================== */
 @media (max-width: 768px) {
     /* 1. NAVBAR COMPACTA (ESTILO APP) */
-    .navbar { 
+    /* REDUCCIÓN DEL BANNER DE LOGIN */
+    .login-hero { height: 180px !important; }
+    .hero-content h1 { font-size: 1.5rem !important; margin-bottom: 5px; }
+    .hero-content p { font-size: 0.85rem !important; margin-top: 0; }
+
+    /* MENÚ HAMBURGUESA LATERAL */
+    .hamburger-btn { display: block; } /* Mostrar botón en celular */
+    
+    .nav-title nav { 
+        display: flex !important; /* Forzamos a que exista */
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: -260px; /* Escondido fuera de la pantalla a la izquierda */
+        width: 240px;
+        height: 100vh;
+        background-color: rgba(0, 26, 51, 0.95); /* Azul PNP oscuro y algo transparente */
+        backdrop-filter: blur(5px);
+        box-shadow: 2px 0 15px rgba(0,0,0,0.6);
+        z-index: 2000;
+        padding-top: 70px; /* Espacio para que no tape el banner */
+        transition: left 0.3s ease-in-out; /* Animación de entrada */
+        margin: 0 !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Clase mágica que hace que el menú entre a la pantalla */
+    .nav-title nav.open { left: 0; }
+
+    /* Estilo de los botones dentro del menú lateral */
+    .nav-title nav a {
+        margin: 0 !important;
+        padding: 15px 25px !important;
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-radius: 0 !important;
+        box-sizing: border-box;
+    }
+	.navbar { 
         flex-direction: row !important; 
         padding: 5px 10px; 
         height: 60px; 
@@ -719,7 +776,6 @@ main {
         text-align: left; 
         line-height: 1.1; 
     }
-    .nav-title nav { display: none; }
     .nav-user { scale: 0.8; transform-origin: right; align-items: flex-end; }
     .status-online { font-size: 0; }
     .status-online::before { content: "●"; font-size: 14px; }
