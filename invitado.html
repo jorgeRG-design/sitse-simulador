@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Jurado SITSE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="background-color: #001a33; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+
+    <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; text-align: center; border-top: 5px solid #ce1126;">
+        <img src="Imagenes/escudoPNP.png" width="80" alt="PNP" style="margin-bottom: 20px;">
+        <h2 style="color: #002d57; margin-top: 0;">Identificación del Jurado</h2>
+        <p style="color: #555; font-size: 0.95rem; margin-bottom: 25px;">Por favor, ingrese su nombre para iniciar la simulación. Sus resultados se enviarán al panel central.</p>
+        
+        <input type="text" id="nombre-jurado" placeholder="Ej: Crnl. Pérez" style="width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; margin-bottom: 20px;">
+        
+        <button onclick="ingresarComoJurado()" class="btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px; background-color: #ce1126;">COMENZAR EVALUACIÓN</button>
+    </div>
+
+    <script>
+        function ingresarComoJurado() {
+            const nombre = document.getElementById('nombre-jurado').value.trim();
+            
+            if (!nombre) {
+                alert("Por favor, ingrese un nombre para identificarse.");
+                return;
+            }
+
+            // Guardamos temporalmente en el celular del jurado
+            sessionStorage.setItem('sitse_guest_name', nombre + ' - INVITADO');
+            sessionStorage.setItem('sitse_is_guest', 'true');
+            
+            // Redirigimos al simulador principal
+            window.location.href = "index.html#dashboard-screen";
+        }
+    </script>
+</body>
+</html>

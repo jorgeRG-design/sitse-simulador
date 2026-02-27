@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SITSE - Plataforma de Instrucción PNP</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/c/c2/Polic%C3%ADa_Nacional_del_Per%C3%BA_logo.svg">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <audio id="audio-tension" loop><source src="tension.mp3" type="audio/mpeg"></audio>
+    <audio id="audio-hover"><source src="https://www.soundjay.com/buttons/sounds/button-16.mp3" type="audio/mpeg"></audio>
+
+    <header id="navbar" class="navbar hidden">
+        <div class="nav-left">
+            <img src="Imagenes/escudoPNP.png" alt="Logo PNP" class="nav-logo">
+            <div class="nav-title">
+                <h1>SISTEMA DE INSTRUCCIÓN TÁCTICA Y SOCIOEMOCIONAL</h1>
+                <nav>
+                    <a href="#" onclick="cambiarPantalla('casel-intro-screen')" onmouseover="playHover()">Modelo CASEL</a>
+                    <a href="#" onclick="cambiarPantalla('experts-screen')" onmouseover="playHover()">Respaldo Clínico</a>
+                    <a href="#" onclick="volverInicio()" onmouseover="playHover()">Simuladores</a>
+                    <a href="#" onclick="verResultadosHistorial()" onmouseover="playHover()">Mis Resultados</a>
+                    <a href="#" id="nav-admin" class="hidden" onclick="verPanelAdmin()" onmouseover="playHover()">Panel Admin</a>
+                </nav>
+            </div>
+        </div>
+		<div class="nav-user">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="notification-container" id="notif-bell" style="display:none;" onclick="verResultadosHistorial()">
+                    <span style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(255,255,0,0.8));">💡</span>
+                    <span id="notif-badge" class="badge-notif">0</span>
+                    <div class="notif-tooltip">Tienes comentarios del instructor</div>
+                </div>
+                
+                <div style="text-align: right;">
+                    <div id="user-name" class="user-name-text">Usuario Invitado</div>
+                    <div class="user-status-row">
+                        <span class="status-online">● En línea</span>
+                        <button onclick="logout()" class="btn-logout">Salir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="login-screen" class="screen active">
+            <div class="login-hero">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1>SITSE - POLICÍA NACIONAL DEL PERÚ</h1>
+                    <p>Evolucionando la toma de decisiones bajo estrés agudo</p>
+                </div>
+            </div>
+
+            <div class="login-container">
+                <div class="login-split-box" id="box-login">
+                    
+                    <div class="login-col-left">
+                        <img src="Imagenes/escudoPNP.png" width="80" alt="Logo PNP" style="display: block; margin: 0 auto 15px auto;">
+                        <h2 style="text-align: center; color: var(--pnp-dark);">Acceso al Sistema</h2>
+                        
+                        <input type="text" id="input-cip" placeholder="Ingrese CIP (Usuario)" maxlength="8" onkeypress="if(event.key === 'Enter') intentarLogin()">
+                        <input type="password" id="input-dni" placeholder="Ingrese DNI (Contraseña)" maxlength="8" onkeypress="if(event.key === 'Enter') intentarLogin()">
+                        
+                        <button onclick="intentarLogin()" class="btn-primary" style="width: 100%; margin-top: 10px;">INGRESAR</button>
+                        
+                        <p id="error-msg" class="error-text"></p>
+                        <p class="nota-login" style="text-align: center;">¿Nuevo usuario? <a href="#" onclick="toggleAuthMode()">Crear cuenta</a></p>
+                    </div>
+
+                    <div class="login-divider"><span>O</span></div>
+
+                    <div class="login-col-right">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://tu-sitio.com/invitado.html" alt="Código QR Jurado" class="qr-img">
+                        
+                        <h3 style="color: var(--pnp-dark); margin-top: 15px;">Acceso para Jurado</h3>
+                        <p style="font-size: 0.9rem; color: #555;">Escanee el código QR con su cámara para ingresar a la evaluación en modo invitado.</p>
+                    </div>
+
+                </div>
+
+                <div class="login-box hidden" id="box-register">
+                    <img src="Imagenes/escudoPNP.png" width="80" alt="PNP">
+                    <h2>Registro de Personal</h2>
+                    <input type="text" id="reg-nombres" placeholder="Apellidos y Nombres">
+                    <input type="text" id="reg-grado" placeholder="Grado (Ej. Alférez, ST1)">
+                    <input type="email" id="reg-correo" placeholder="Correo Electrónico">
+                    <input type="text" id="reg-cip" placeholder="CIP (Será su usuario)" maxlength="8">
+                    <input type="text" id="reg-dni" placeholder="DNI (Contraseña)" maxlength="8" onkeypress="if(event.key === 'Enter') registrarUsuario()">
+                    <button onclick="registrarUsuario()" class="btn-primary" style="width: 100%;">REGISTRAR</button>
+                    <p id="reg-msg" class="success-text"></p>
+                    <p class="nota-login">¿Ya tiene cuenta? <a href="#" onclick="toggleAuthMode()">Iniciar sesión</a></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="casel-intro-screen" class="screen hidden">
+            
+            <div class="scroll-section fade-element" style="text-align: left; align-items: flex-start; padding: 20px 0;">
+                <h2 style="color: var(--pnp-dark); font-size: 2.2rem; margin-bottom: 20px; width: 100%;">El Motor de las Decisiones Críticas</h2>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 40px; width: 100%; align-items: center;">
+                    <div style="flex: 1.2; min-width: 300px;">
+                        <p style="font-size: 1.1rem; line-height: 1.6; color: #444;">El modelo CASEL no es solo teoría; es supervivencia y eficacia operativa. Integramos la inteligencia emocional a la táctica policial para predecir la respuesta del efectivo en situaciones de alto riesgo, reduciendo bajas y mitigando el impacto legal negativo.</p>
+                        
+                        <div style="margin-top: 30px; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid var(--pnp-dark);">
+                            <h4 style="margin-top:0; margin-bottom: 20px; color: var(--pnp-dark); font-size: 1.1rem;">Contexto Operativo Nacional (Reporte Anual)</h4>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #333;">
+                                    <span>Conflictos Sociales Registrados</span>
+                                    <span>214</span>
+                                </div>
+                                <div style="width: 100%; background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="width: 100%; height: 100%; background: #546e7a;"></div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #333;">
+                                    <span>Derivaron en Enfrentamiento Físico (35%)</span>
+                                    <span style="color: var(--accent);">75</span>
+                                </div>
+                                <div style="width: 100%; background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                    <div style="width: 35%; height: 100%; background: var(--accent);"></div>
+                                </div>
+                            </div>
+                            
+                            <p style="font-size: 0.8rem; color: #7f8c8d; font-style: italic; margin-bottom: 0; line-height: 1.4;">* El 80% de las escaladas violentas están asociadas a un déficit en el manejo del estrés y la inteligencia emocional bajo presión. El entrenamiento CASEL busca revertir esta curva.</p>
+                        </div>
+                    </div>
+
+                    <div style="flex: 1; min-width: 300px; text-align: center;">
+                        <img src="Imagenes/imagenPrincipal.png" style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 10px 25px rgba(196, 167, 71, 0.5);">
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-section fade-element" style="background: var(--pnp-dark); color: white; padding: 50px 40px; border-radius: 15px; margin-top: 40px; width: 100%; box-sizing: border-box;">
+                <h2 style="margin-top: 0; margin-bottom: 30px; text-align: center; font-size: 2rem;">Las 6 Dimensiones Operativas <span style="font-size:1rem; font-weight:normal; display:block; margin-top:10px; color:#aaa;">(Pase el puntero sobre cada una)</span></h2>
+                
+                <div class="grid-casel">
+                    <div class="casel-card interactive">
+                        <h3>🧠 Autoconciencia</h3>
+                        <div class="casel-overlay"><p>Reconocer el disparo de adrenalina. Evaluar tu propio estado emocional bajo amenaza antes de perder el control.</p></div>
+                    </div>
+                    <div class="casel-card interactive">
+                        <h3>🛡️ Autocontrol</h3>
+                        <div class="casel-overlay"><p>Dominio táctico de los impulsos ante la provocación civil. Gestión del estrés en tiempo real.</p></div>
+                    </div>
+                    <div class="casel-card interactive">
+                        <h3>👁️ Conciencia Social</h3>
+                        <div class="casel-overlay"><p>Lectura rápida del entorno, identificación de turbas, víctimas y amenazas ocultas en milisegundos.</p></div>
+                    </div>
+                    <div class="casel-card interactive">
+                        <h3>🤝 Hab. Relacionales</h3>
+                        <div class="casel-overlay"><p>Liderazgo de escuadra, trabajo en equipo y técnicas de de-escalación verbal con el infractor.</p></div>
+                    </div>
+                    <div class="casel-card interactive">
+                        <h3>⚖️ Toma de Decisiones</h3>
+                        <div class="casel-overlay"><p>Procesamiento ético, legal y proporcional del uso de la fuerza frente a presiones extremas.</p></div>
+                    </div>
+                    <div class="casel-card interactive">
+                        <h3>🗣️ Comunicación Asertiva</h3>
+                        <div class="casel-overlay"><p>Capacidad para transmitir órdenes claras, deslegitimar agresores y controlar la narrativa operativa.</p></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scroll-section fade-element" style="min-height: auto; margin-top: 40px; margin-bottom: 40px;">
+                <button onclick="cambiarPantalla('dashboard-screen')" class="btn-primary" style="font-size: 1.2rem; padding: 18px 40px; box-shadow: 0 5px 15px rgba(0, 104, 71, 0.4); border-radius: 30px;">🎯 INICIAR ENTRENAMIENTO TÁCTICO</button>
+            </div>
+        </section>
+
+        <section id="experts-screen" class="screen hidden">
+			<div class="experts-header fade-element">
+				<h2>Respaldo Clínico e Institucional</h2>
+				<p>Validado por profesionales en psicología operativa y táctica policial.</p>
+			</div>
+
+			<div class="expert-card-pano fade-element" style="justify-content: flex-start; gap: 30px; background-image: linear-gradient(to left, rgba(244, 246, 249, 0) 0%, rgba(244, 246, 249, 0.6) 50%, rgba(244, 246, 249, 0.85) 100%), url('Imagenes/crnlBanner.png');">
+
+				<div class="expert-img" style="background-image: url('Imagenes/crnlFoto.png'); background-size: cover; background-position: center;"></div>
+
+				<div class="expert-text" style="text-align: left;">
+					<h3>Crnl. PNP (r) Roberto Cárdenas</h3>
+					<h4>Ex Instructor de Unidades Especiales</h4>
+					<p>"La táctica sin control emocional es negligencia. Este sistema cuantifica lo que antes solo suponíamos: el nivel de madurez operativa del efectivo. Es la herramienta definitiva para auditorías de entrenamiento."</p>
+				</div>
+
+			</div>
+
+			<div class="expert-card-pano fade-element" style="gap: 30px; background-image: linear-gradient(to right, rgba(244, 246, 249, 0) 0%, rgba(244, 246, 249, 0.6) 50%, rgba(244, 246, 249, 0.85) 100%), url('Imagenes/draBanner.png');">
+
+				<div class="expert-text" style="text-align: right;">
+					<h3>Dra. Elena Villarán</h3>
+					<h4>Psicóloga Forense y Especialista en Trauma</h4>
+					<p>"El simulador SITSE cierra la brecha entre la teoría del aula y el caos de la calle. Evaluar las competencias CASEL en entornos de alta fidelidad permite predecir y corregir respuestas de estrés agudo antes de que resulten en fatalidades legales o humanas."</p>
+				</div>
+
+				<div class="expert-img" style="background-image: url('Imagenes/draFoto.png'); background-size: cover; background-position: center;"></div>
+
+			</div>
+		</section>
+
+        <section id="dashboard-screen" class="screen hidden">
+            <div class="dashboard-header">
+                <h2>Simuladores de Intervención SITSE</h2>
+                <p>Seleccione un escenario. Su tiempo de respuesta y elecciones construirán su perfil psicométrico.</p>
+            </div>
+            <div class="grid-casos">
+                </div>
+        </section>
+
+        <section id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <button onclick="volverInicio()" class="btn-back">⬅ Abortar Misión</button>
+                <div class="stats-bar">
+                    <span id="score-display">Puntaje: 0</span>
+                </div>
+                <div id="timer-box">TIEMPO: <span id="timer-count">15</span>s</div>
+            </div>
+            <div class="simulation-container">
+                <div class="scene-visual">
+					<video id="escena-video" autoplay loop muted playsinline style="width: 100%; border-radius: 8px; object-fit: cover; border: 2px solid #eee;">
+						<source id="video-source" src="" type="video/mp4">
+						Tu navegador no soporta video.
+					</video>
+				</div>
+                <div class="scene-control">
+                    <h3 id="escena-titulo">Situación</h3>
+                    <p id="escena-texto">Descripción...</p>
+                    <div id="opciones-container" class="btn-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history-screen" class="screen hidden">
+            <h2>Mi Expediente Operativo</h2>
+            <div class="table-container">
+                <table id="tabla-resultados">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Escenario</th>
+                            <th>Puntaje</th>
+                            <th>Evaluación Integral</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+		<section id="admin-screen" class="screen hidden">
+					<div class="admin-header">
+						<h2>Panel de Comando Central</h2>
+						<p id="admin-breadcrumb">Menú Principal</p>
+					</div>
+
+					<div id="admin-menu" class="grid-casos">
+						<div class="card-caso" onclick="mostrarAdminUsuarios()">
+							<div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/1256/1256650.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+							<div class="card-info" style="text-align: center;">
+								<h3>1. Personal Evaluado</h3>
+								<p>Ver registros individuales e historial de simulaciones por usuario.</p>
+							</div>
+						</div>
+						<div class="card-caso" onclick="mostrarAdminListaCasos()">
+							<div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/3112/3112946.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+							<div class="card-info" style="text-align: center;">
+								<h3>2. Ranking Global</h3>
+								<p>Tabla de mérito general según el simulador ejecutado.</p>
+							</div>
+						</div>
+						<div class="card-caso" onclick="mostrarAdminListaCompetencias()">
+							<div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/2635/2635324.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+							<div class="card-info" style="text-align: center;">
+								<h3>3. Ranking por Competencias</h3>
+								<p>Tabla de mérito enfocada en habilidades CASEL específicas.</p>
+							</div>
+						</div>
+						<div class="card-caso" onclick="mostrarAdminGestionDatos()">
+							<div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/2907/2907496.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+							<div class="card-info" style="text-align: center;">
+								<h3>4. Gestión de Registros</h3>
+								<p>Borrado masivo, selectivo y limpieza total de la base de datos.</p>
+							</div>
+						</div>
+					</div>
+
+					<div id="admin-content" class="hidden">
+						<button onclick="volverMenuAdmin()" class="btn-back" style="margin-bottom: 20px;">⬅ Volver al Menú Admin</button>
+						<div id="admin-dynamic-view"></div>
+					</div>
+		</section>
+
+        <section id="result-screen" class="screen hidden">
+            <div class="result-box">
+                <h2>Informe Psicométrico de Intervención</h2>
+                <div id="result-content"></div>
+            </div>
+        </section>
+    </main>
+	
+	<div id="tree-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 20, 0.95); z-index: 9999; display: flex; flex-direction: column;">
+            <div style="padding: 20px; background: #001a33; border-bottom: 2px solid #00b4d8; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="color: white; margin: 0; font-family: monospace;">> MAPA DE TRAYECTORIA TÁCTICA</h2>
+                <button onclick="cerrarArbol()" style="background: red; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Cerrar [X]</button>
+            </div>
+            <div id="tree-container" style="flex: 1; overflow-x: auto; overflow-y: auto; padding: 60px; display: flex; align-items: center; gap: 50px;">
+                </div>
+     </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p><strong>Policía Nacional del Perú</strong> - Sistema de Instrucción Táctica y Socioemocional (SITSE)</p>
+            <p>Evaluación CASEL Integrada | &copy; 2026</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+	<script src="casos.js"></script> <script src="script.js"></script>
+</html>
