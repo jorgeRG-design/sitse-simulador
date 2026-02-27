@@ -66,6 +66,9 @@ main { flex: 1; padding-bottom: 120px; }
     cursor: pointer;
     padding: 0 10px 0 0;
     line-height: 1;
+    position: relative; /* NECESARIO para que funcione el z-index */
+    z-index: 2001;      /* Mayor que el menú (2000) para que siempre quede al frente */
+    transition: transform 0.2s ease;
 }
 
 .nav-title nav a {
