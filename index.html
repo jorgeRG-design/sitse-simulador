@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
+	
 <body>
 
     <audio id="audio-tension" loop><source src="tension.mp3" type="audio/mpeg"></audio>
@@ -16,15 +17,17 @@
 
     <header id="navbar" class="navbar hidden">
         <div class="nav-left">
+            <button id="menu-toggle" class="hamburger-btn" onclick="toggleMenu()">☰</button>
             <img src="Imagenes/escudoPNP.png" alt="Logo PNP" class="nav-logo">
+            
             <div class="nav-title">
                 <h1>SISTEMA DE INSTRUCCIÓN TÁCTICA Y SOCIOEMOCIONAL</h1>
-                <nav>
-                    <a href="#" onclick="cambiarPantalla('casel-intro-screen')" onmouseover="playHover()">Modelo CASEL</a>
-                    <a href="#" onclick="cambiarPantalla('experts-screen')" onmouseover="playHover()">Respaldo Clínico</a>
-                    <a href="#" onclick="volverInicio()" onmouseover="playHover()">Simuladores</a>
-                    <a href="#" onclick="verResultadosHistorial()" onmouseover="playHover()">Mis Resultados</a>
-                    <a href="#" id="nav-admin" class="hidden" onclick="verPanelAdmin()" onmouseover="playHover()">Panel Admin</a>
+                <nav id="nav-menu">
+                    <a href="#" onclick="cambiarPantalla('casel-intro-screen'); cerrarMenu()" onmouseover="playHover()">Modelo CASEL</a>
+                    <a href="#" onclick="cambiarPantalla('experts-screen'); cerrarMenu()" onmouseover="playHover()">Respaldo Clínico</a>
+                    <a href="#" onclick="volverInicio(); cerrarMenu()" onmouseover="playHover()">Simuladores</a>
+                    <a href="#" onclick="verResultadosHistorial(); cerrarMenu()" onmouseover="playHover()">Mis Resultados</a>
+                    <a href="#" id="nav-admin" class="hidden" onclick="verPanelAdmin(); cerrarMenu()" onmouseover="playHover()">Panel Admin</a>
                 </nav>
             </div>
         </div>
@@ -53,8 +56,8 @@
             <h2 style="color: var(--pnp-dark);">Sincronizando Sistema SITSE...</h2>
             <p style="color: #666;">Verificando credenciales y expedientes en la nube central.</p>
         </section>
-        
-        <section id="login-screen" class="screen hidden">
+		
+		<section id="login-screen" class="screen hidden">
             <div class="login-hero">
                 <div class="hero-overlay"></div>
                 <div class="hero-content">
@@ -334,4 +337,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
