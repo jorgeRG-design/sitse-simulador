@@ -840,7 +840,7 @@ function mostrarAdminGestionDatos() {
     let html = `<h3>Base de Datos de Simulaciones</h3>
                 <div style="display:flex; gap:15px; margin-bottom: 20px;">
                     <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;"> Borrar Seleccionados</button>
-                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;">Vaciar Toda la Base</button>
+                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;"> Vaciar Toda la Base</button>
                 </div>
                 <div class="table-container">
                     <table>
@@ -914,7 +914,7 @@ function borrarSeleccionados() {
 }
 
 function vaciarBaseDatos() {
-    if(confirm("¡ADVERTENCIA CRÍTICA!\n\nÂ¿Está absolutamente seguro de querer VACIAR TODA LA BASE DE DATOS?\nSe perderán todos los resultados y rankings de TODOS los usuarios.")) {
+    if(confirm("Â¡ADVERTENCIA CRÍTICA!\n\nÂ¿Está absolutamente seguro de querer VACIAR TODA LA BASE DE DATOS?\nSe perderán todos los resultados y rankings de TODOS los usuarios.")) {
         let checkExtra = prompt("Escriba la palabra 'BORRAR' (en mayúsculas) para confirmar:");
         if(checkExtra === 'BORRAR') {
             localStorage.removeItem('sitse_resultados'); // Elimina la clave completa
@@ -990,4 +990,3 @@ function cerrarArbol() {
     document.getElementById('tree-modal').style.display = 'none';
     document.getElementById('tree-modal').classList.add('hidden');
 }
-
