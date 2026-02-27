@@ -93,6 +93,7 @@ window.onload = function() {
 
         document.getElementById('login-screen').classList.add('hidden'); // Ocultar login
         iniciarSesionUI();
+		sincronizarBaseDatos();
     }
 
     // 3. EVENTOS DE TECLADO PARA LOGIN NORMAL
@@ -347,8 +348,8 @@ function procesarDecision(opcion, escenaAnterior, fueTimeout = false) {
     
     for (let key in opcion.stats) { statsAcumulados[key] += opcion.stats[key]; }
 
-    let puntosBase = opcion.tipo === "IdÃ³neo" ? 100 : opcion.tipo === "Aceptable" ? 60 : opcion.tipo === "En Progreso" ? 20 : -50;
-    let bonoVelocidad = (opcion.tipo === "IdÃ³neo" && tiempoUsado < 5) ? 50 : 0;
+    let puntosBase = opcion.tipo === "Idóneo" ? 100 : opcion.tipo === "Aceptable" ? 60 : opcion.tipo === "En Progreso" ? 20 : -50;
+    let bonoVelocidad = (opcion.tipo === "Idóneo" && tiempoUsado < 5) ? 50 : 0;
     let puntosObtenidos = puntosBase + bonoVelocidad;
     puntajeAcumulado += puntosObtenidos;
 
@@ -388,11 +389,16 @@ function finalizarSimulacion(textoFinal) {
     };
 
     // GUARDAR EN FIREBASE (LA NUBE)
-    db.collection("resultados_sitse").add(resultado)
-    .then((docRef) => {
-        console.log("Misión registrada en la nube con ID: ", docRef.id);
-        generarInformeFinal(resultado, textoFinal);
-    })
+    // GUARDAR EN FIREBASE (LA NUBE)
+	db.collection("resultados_sitse").add(resultado)
+	.then(async (docRef) => { // <-- Añade 'async' aquí
+	    console.log("Misión registrada en la nube con ID: ", docRef.id);
+	    
+	    // <-- AÑADE ESTA LÍNEA para actualizar la memoria al instante
+	    await sincronizarBaseDatos(); 
+	    
+	    generarInformeFinal(resultado, textoFinal);
+	})
     .catch((error) => {
         console.error("Error al guardar el expediente: ", error);
         alert("Hubo un error de conexión al guardar sus resultados.");
@@ -640,22 +646,37 @@ function volverMenuAdmin() {
 function mostrarAdminUsuarios() {
     document.getElementById('admin-menu').classList.add('hidden');
     document.getElementById('admin-content').classList.remove('hidden');
-    document.getElementById('admin-breadcrumb').innerText = "MenÃº Principal > Personal Evaluado";
+    document.getElementById('admin-breadcrumb').innerText = "Menú Principal > Personal Evaluado";
     
     let resultados = JSON.parse(localStorage.getItem('sitse_resultados')) || [];
-    // AHORA LEEMOS LA LISTA DIRECTO DE LOS USUARIOS REGISTRADOS, NO DE LOS RESULTADOS
     let usuariosRegistrados = JSON.parse(localStorage.getItem('sitse_users')) || [];
     
+    // Diccionario para agrupar usuarios únicos
+    let usuariosUnicos = {};
+    
+    // 1. Añadimos a los registrados por defecto
+    usuariosRegistrados.forEach(u => {
+        usuariosUnicos[u.cip] = { nombres: u.nombres, cip: u.cip, total: 0 };
+    });
+
+    // 2. Extraemos a TODOS los que jugaron desde los resultados (¡Atrapa a los invitados!)
+    resultados.forEach(r => {
+        if(!usuariosUnicos[r.usuario]) {
+            usuariosUnicos[r.usuario] = { nombres: r.nombre, cip: r.usuario, total: 0 };
+        }
+        usuariosUnicos[r.usuario].total++;
+    });
+
+    let listaFinal = Object.values(usuariosUnicos);
     let html = `<h3>Seleccione un Efectivo:</h3><div style="display:flex; flex-direction:column; gap:10px;">`;
     
-    if (usuariosRegistrados.length === 0) {
-        html += `<p style="text-align:center; padding: 20px; background:#fff; border-radius:8px;">No hay ningÃºn usuario registrado en el sistema.</p>`;
+    if (listaFinal.length === 0) {
+        html += `<p style="text-align:center; padding: 20px; background:#fff; border-radius:8px;">No hay ningún usuario en el sistema.</p>`;
     } else {
-        usuariosRegistrados.forEach(user => {
-            let totalSimulaciones = resultados.filter(r => r.usuario === user.cip).length;
+        listaFinal.forEach(user => {
             html += `<div class="admin-list-item" onclick="mostrarHistorialUsuario('${user.cip}', '${user.nombres}')">
                         <span><strong>${user.nombres}</strong> (CIP: ${user.cip})</span>
-                        <span>${totalSimulaciones} simulaciones completadas âž”</span>
+                        <span>${user.total} simulaciones completadas ➔</span>
                      </div>`;
         });
     }
@@ -969,5 +990,6 @@ function cerrarArbol() {
     document.getElementById('tree-modal').classList.add('hidden');
 
 }
+
 
 
