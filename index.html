@@ -183,4 +183,148 @@
                 <p>Validado por profesionales en psicología operativa y táctica policial.</p>
             </div>
 
-            <div class="expert
+            <div class="expert-card-pano fade-element" style="justify-content: flex-start; gap: 30px; background-image: linear-gradient(to left, rgba(244, 246, 249, 0) 0%, rgba(244, 246, 249, 0.6) 50%, rgba(244, 246, 249, 0.85) 100%), url('Imagenes/crnlBanner.png');">
+
+                <div class="expert-img" style="background-image: url('Imagenes/crnlFoto.png'); background-size: cover; background-position: center;"></div>
+
+                <div class="expert-text" style="text-align: left;">
+                    <h3>Crnl. PNP (r) Roberto Cárdenas</h3>
+                    <h4>Ex Instructor de Unidades Especiales</h4>
+                    <p>"La táctica sin control emocional es negligencia. Este sistema cuantifica lo que antes solo suponíamos: el nivel de madurez operativa del efectivo. Es la herramienta definitiva para auditorías de entrenamiento."</p>
+                </div>
+
+            </div>
+
+            <div class="expert-card-pano fade-element" style="gap: 30px; background-image: linear-gradient(to right, rgba(244, 246, 249, 0) 0%, rgba(244, 246, 249, 0.6) 50%, rgba(244, 246, 249, 0.85) 100%), url('Imagenes/draBanner.png');">
+
+                <div class="expert-text" style="text-align: right;">
+                    <h3>Dra. Elena Villarán</h3>
+                    <h4>Psicóloga Forense y Especialista en Trauma</h4>
+                    <p>"El simulador SITSE cierra la brecha entre la teoría del aula y el caos de la calle. Evaluar las competencias CASEL en entornos de alta fidelidad permite predecir y corregir respuestas de estrés agudo antes de que resulten en fatalidades legales o humanas."</p>
+                </div>
+
+                <div class="expert-img" style="background-image: url('Imagenes/draFoto.png'); background-size: cover; background-position: center;"></div>
+
+            </div>
+        </section>
+
+        <section id="dashboard-screen" class="screen hidden">
+            <div class="dashboard-header">
+                <h2>Simuladores de Intervención SITSE</h2>
+                <p>Seleccione un escenario. Su tiempo de respuesta y elecciones construirán su perfil psicométrico.</p>
+            </div>
+            <div class="grid-casos">
+                </div>
+        </section>
+
+        <section id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <button onclick="volverInicio()" class="btn-back">⬅ Abortar Misión</button>
+                <div class="stats-bar">
+                    <span id="score-display">Puntaje: 0</span>
+                </div>
+                <div id="timer-box">TIEMPO: <span id="timer-count">15</span>s</div>
+            </div>
+            <div class="simulation-container">
+                <div class="scene-visual">
+                    <video id="escena-video" autoplay loop muted playsinline style="width: 100%; border-radius: 8px; object-fit: cover; border: 2px solid #eee;">
+                        <source id="video-source" src="" type="video/mp4">
+                        Tu navegador no soporta video.
+                    </video>
+                </div>
+                <div class="scene-control">
+                    <h3 id="escena-titulo">Situación</h3>
+                    <p id="escena-texto">Descripción...</p>
+                    <div id="opciones-container" class="btn-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history-screen" class="screen hidden">
+            <h2>Mi Expediente Operativo</h2>
+            <div class="table-container">
+                <table id="tabla-resultados">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Escenario</th>
+                            <th>Puntaje</th>
+                            <th>Evaluación Integral</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="admin-screen" class="screen hidden">
+                    <div class="admin-header">
+                        <h2>Panel de Comando Central</h2>
+                        <p id="admin-breadcrumb">Menú Principal</p>
+                    </div>
+
+                    <div id="admin-menu" class="grid-casos">
+                        <div class="card-caso" onclick="mostrarAdminUsuarios()">
+                            <div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/1256/1256650.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+                            <div class="card-info" style="text-align: center;">
+                                <h3>1. Personal Evaluado</h3>
+                                <p>Ver registros individuales e historial de simulaciones por usuario.</p>
+                            </div>
+                        </div>
+                        <div class="card-caso" onclick="mostrarAdminListaCasos()">
+                            <div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/3112/3112946.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+                            <div class="card-info" style="text-align: center;">
+                                <h3>2. Ranking Global</h3>
+                                <p>Tabla de mérito general según el simulador ejecutado.</p>
+                            </div>
+                        </div>
+                        <div class="card-caso" onclick="mostrarAdminListaCompetencias()">
+                            <div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/2635/2635324.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+                            <div class="card-info" style="text-align: center;">
+                                <h3>3. Ranking por Competencias</h3>
+                                <p>Tabla de mérito enfocada en habilidades CASEL específicas.</p>
+                            </div>
+                        </div>
+                        <div class="card-caso" onclick="mostrarAdminGestionDatos()">
+                            <div class="card-img" style="background-image: url('https://cdn-icons-png.flaticon.com/512/2907/2907496.png'); background-size: contain; background-repeat: no-repeat; background-position: center; height: 120px; margin-top: 20px;"></div>
+                            <div class="card-info" style="text-align: center;">
+                                <h3>4. Gestión de Registros</h3>
+                                <p>Borrado masivo, selectivo y limpieza total de la base de datos.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-content" class="hidden">
+                        <button onclick="volverMenuAdmin()" class="btn-back" style="margin-bottom: 20px;">⬅ Volver al Menú Admin</button>
+                        <div id="admin-dynamic-view"></div>
+                    </div>
+        </section>
+
+        <section id="result-screen" class="screen hidden">
+            <div class="result-box">
+                <h2>Informe Psicométrico de Intervención</h2>
+                <div id="result-content"></div>
+            </div>
+        </section>
+    </main>
+    
+    <div id="tree-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 20, 0.95); z-index: 9999; display: flex; flex-direction: column;">
+            <div style="padding: 20px; background: #001a33; border-bottom: 2px solid #00b4d8; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="color: white; margin: 0; font-family: monospace;">> MAPA DE TRAYECTORIA TÁCTICA</h2>
+                <button onclick="cerrarArbol()" style="background: red; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Cerrar [X]</button>
+            </div>
+            <div id="tree-container" style="flex: 1; overflow-x: auto; overflow-y: auto; padding: 60px; display: flex; align-items: center; gap: 50px;">
+                </div>
+     </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p><strong>Policía Nacional del Perú</strong> - Sistema de Instrucción Táctica y Socioemocional (SITSE)</p>
+            <p>Evaluación CASEL Integrada | &copy; 2026</p>
+        </div>
+    </footer>
+    <script src="casos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
