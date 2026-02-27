@@ -839,8 +839,8 @@ function mostrarAdminGestionDatos() {
     
     let html = `<h3>Base de Datos de Simulaciones</h3>
                 <div style="display:flex; gap:15px; margin-bottom: 20px;">
-                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;"> Borrar Seleccionados</button>
-                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;"> Vaciar Toda la Base</button>
+                    <button onclick="borrarSeleccionados()" class="btn-primary" style="background:var(--warning); color:#000; box-shadow:none;">Borrar Seleccionados</button>
+                    <button onclick="vaciarBaseDatos()" class="btn-primary" style="background:var(--danger); box-shadow:none;">Vaciar Toda la Base</button>
                 </div>
                 <div class="table-container">
                     <table>
@@ -990,3 +990,4 @@ function cerrarArbol() {
     document.getElementById('tree-modal').style.display = 'none';
     document.getElementById('tree-modal').classList.add('hidden');
 }
+
